@@ -355,7 +355,7 @@ function tryDetectError(gl) {
             [gl.OUT_OF_MEMORY, "Out of memory"],
             [gl.CONTEXT_LOST_WEBGL, "Context lost webgl"]
         ]
-        .filter(item => item[0] == errorCode)
+            .filter(item => item[0] == errorCode)
             .map(item => item[1])
             .forEach(item => console.error(errorCode + " means: " + item));
 
