@@ -1,0 +1,24 @@
+{
+  "name": "webgldemo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webgl-demo.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vilka27/WebGlDemo.git"
+  },
+  "author": "",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/vilka27/WebGlDemo/issues"
+  },
+  "homepage": "https://github.com/vilka27/WebGlDemo#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2"
+  }
+}
