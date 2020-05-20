@@ -18,6 +18,7 @@
         "linebreak-style" : "off",
         "no-bitwise" : "off",
         "no-plusplus" : "off",
-        "indent": ["error", 4]
+        "indent": ["error", 4],
+        "no-console": "off"
     }
 }
