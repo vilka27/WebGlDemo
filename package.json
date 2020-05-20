@@ -5,7 +5,7 @@
   "main": "webgl-demo.js",
   "scripts": {
     "test": "test",
-    "dist": "tsc",
+    "dist": "tsc -w",
     "tsLint": "tslint --project tsconfig.json --fix",
     "build": "npm run tsLint & npm run dist"
   },

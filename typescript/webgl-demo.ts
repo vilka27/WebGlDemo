@@ -1,10 +1,11 @@
 import  { Shader } from './shader';
 import  { DefaultShader } from './defaultShader';
+import { Model } from './model';
 
 let mat4 = (window as any).mat4;
 let cubeRotation = 0.0;
 
-function tryDetectError(gl) {
+function tryDetectError(gl:WebGLRenderingContext) {
     const errorCode = gl.getError();
     if (errorCode !== gl.NO_ERROR) {
         console.error(`GL ERROR OCCURED, CODE=${errorCode}`);
@@ -20,73 +21,7 @@ function tryDetectError(gl) {
             .forEach((item) => console.error(`${errorCode} means: ${item}`));
     }
 }
-function drawObject(gl, viewMatrix, vertexCount, buffer,
-    shader: Shader
-    ) {
-    // second draw
-    {
-        const numComponents = 1;
-        const type = gl.FLOAT;
-        const normalize = true;
-        const stride = 0;
-        const offset = 0;
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer.normales);
-        gl.vertexAttribPointer(
-            shader.getAttribute('aVertexNorm'),
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset,
-        );
-        gl.enableVertexAttribArray(shader.getAttribute('aVertexNorm'));
-    }
-    {
-        const numComponents = 3;
-        const type = gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer.position);
-        gl.vertexAttribPointer(
-            shader.getAttribute('aVertexPosition'),
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset,
-        );
-        gl.enableVertexAttribArray(
-            shader.getAttribute('aVertexPosition'),
-        );
-    } {
-        const numComponents = 4;
-        const type = gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer.color);
-        gl.vertexAttribPointer(
-            shader.getAttribute('aVertexColor'),
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset,
-        );
-        gl.enableVertexAttribArray(
-            shader.getAttribute('aVertexColor'),
-        );
-    }
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer.indices);
-    shader.setMatrix('uModelViewMatrix', viewMatrix);
-     {
-        const type = gl.UNSIGNED_SHORT;
-        const offset = 0;
-        gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
-    }
-}
-function drawCube(gl, buffers, shader: Shader) {
+function getCubeMatrix(){
     const modelViewMatrix = mat4.create();
     mat4.translate(modelViewMatrix, // destination matrix
         modelViewMatrix, // matrix to translate
@@ -99,21 +34,20 @@ function drawCube(gl, buffers, shader: Shader) {
         modelViewMatrix, // matrix to rotate
         cubeRotation * 0.7, // amount to rotate in radians
         [0, 1, 0]); // axis to rotate around (X)
-
-    drawObject(gl, modelViewMatrix, 36, buffers[0], shader);
+    return modelViewMatrix;
 }
-function drawOcto(gl, buffers, shader: Shader) {
+function getOctoMatrix(){
     const modelViewMatrix2 = mat4.create();
     mat4.translate(modelViewMatrix2, // destination matrix
         modelViewMatrix2, // matrix to translate
         [-1.0, 1.0, -5.0]); // amount to translate
-    drawObject(gl, modelViewMatrix2, 24, buffers[1], shader);
+        return modelViewMatrix2;
 }
 function drawScene(
-    gl,
+    gl: WebGLRenderingContext,
     shader: Shader,
-    buffers,
-    deltaTime
+    deltaTime: number,
+    models: Model[],
 ) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
@@ -123,7 +57,8 @@ function drawScene(
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     const fieldOfView = 60 * (Math.PI / 180); // in radians
-    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const canvas = gl.canvas as HTMLCanvasElement;
+    const aspect = canvas.clientWidth / canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;
     const projectionMatrix = mat4.create();
@@ -135,42 +70,17 @@ function drawScene(
         zFar);
 
     shader.useProgram();
+
     shader.setMatrix('uProjectionMatrix', projectionMatrix);
 
-    drawCube(gl, buffers, shader);
-    drawOcto(gl, buffers, shader);
+    models[0].draw(getCubeMatrix(),shader);
+    models[1].draw(getOctoMatrix(),shader);
 
     cubeRotation += deltaTime;
 
     tryDetectError(gl);
 }
-
-function createSimpleBuffer(gl, positions, indices, color:any[], normales) {
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-    const colorBuffer = gl.createBuffer();
-    const colors = (new Array(Math.ceil(positions.length / 3))).fill(color, 0).flat();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-    const indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-
-    const normBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normales), gl.STATIC_DRAW);
-
-    return {
-        position: positionBuffer,
-        color: colorBuffer,
-        indices: indexBuffer,
-        normales: normBuffer,
-    };
-}
-function cubeBuffer(gl) {
+function getCubeModel(gl:WebGLRenderingContext):Model{
     const indices = [
         0, 2, 3, 0, 1, 2, // front
         4, 5, 6, 4, 6, 7, // back
@@ -210,22 +120,9 @@ function cubeBuffer(gl) {
         -1.0, 1.0, 1.0,
         -1.0, 1.0, -1.0,
     ];
-    const normales = [
-        0.2, 0.2, 0.2, 0.2,
-
-        0.3, 0.3, 0.3, 0.3,
-
-        2, 2, 2, 2,
-
-        0, 0, 0, 0,
-
-        0.7, 0.7, 0.7, 0.7,
-
-        0.5, 0.5, 0.5, 0.5,
-    ];
-    return createSimpleBuffer(gl, positions, indices, [1, 1, 0, 1], normales);
+    return new Model(gl,positions,indices,[1,1,0,1]);
 }
-function octoBuffer(gl) {
+function getOctoModel(gl:WebGLRenderingContext):Model{
     const i = [
         0, 3, 4,
         0, 1, 4,
@@ -236,14 +133,7 @@ function octoBuffer(gl) {
         1, 2, 5,
         0, 1, 5,
     ];
-    const n = [
-        2,
-        0.5,
-        0,
-        0.5,
-        0.7,
-        0.3,
-    ];
+
     const p = [
         1, 0, 0, // A
         0, -1, 0, // B
@@ -252,32 +142,23 @@ function octoBuffer(gl) {
         0, 0, -1, // E
         0, 0, 1, // F
     ];
-
-    return createSimpleBuffer(gl, p, i, [1.0, 0.0, 0.0, 1.0], n);
+    return new Model(gl,p,i,[1.0, 0.0, 0.0, 1.0]);
 }
-function main() {
-    const canvas = document.querySelector('#glcanvas') as HTMLCanvasElement;
-    const gl = canvas.getContext('webgl');
-
-    if (!gl) {
-        alert('Unable to initialize WebGL. Your browser or machine may not support it.');
-        return;
-    }
-
+function initRenderLoop(gl:WebGLRenderingContext) {
     const shader = new DefaultShader(gl);
-
-    const buffers = [cubeBuffer(gl), octoBuffer(gl)];
     let then = 0;
 
-    function render(now) {
+    function render(now: number) {
         const newNow = 0.001 * now; // convert to seconds
         const deltaTime = newNow - then;
         then = newNow;
 
-        drawScene(gl, shader, buffers, deltaTime);
+        const models = [ getCubeModel(gl), getOctoModel(gl) ];
+
+        drawScene( gl, shader, deltaTime, models );
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
 }
 
-export default main;
+export default initRenderLoop;
