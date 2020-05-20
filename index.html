@@ -10,5 +10,9 @@
         <canvas id="glcanvas" width="640" height="480"></canvas>
     </body>
     <script src="lib/gl-matrix.js"></script>
+    <script src="lib/require.js"></script>
     <script src="bundle/dist.js"></script>
+    <script>
+        require(["webgl-demo"], function(a) { a.default() });
+    </script>
 </html>
