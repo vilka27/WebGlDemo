@@ -5,7 +5,9 @@
   "main": "webgl-demo.js",
   "scripts": {
     "test": "test",
-    "dist": "tsc"
+    "dist": "tsc",
+    "tsLint": "tslint --project tsconfig.json --fix",
+    "build": "npm run tsLint & npm run dist"
   },
   "repository": {
     "type": "git",
@@ -18,10 +20,8 @@
   },
   "homepage": "https://github.com/vilka27/WebGlDemo#readme",
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "tslint": "^6.1.2"
   },
   "dependencies": {}
 }

@@ -1,0 +1,47 @@
+{
+  "defaultSeverity": "error",
+  "jsRules": {},
+  "rules": {
+    "semicolon": [true, "always"],
+    "indent": [
+      true,
+      "spaces",
+      4
+    ],
+    "quotemark": [
+      true,
+      "single",
+      "jsx-double"
+    ],
+    "object-literal-key-quotes": [
+      true,
+      "as-needed"
+    ],
+    "ordered-imports": [
+      true,
+      {
+        "import-sources-order": "any",
+        "named-imports-order": "case-insensitive"
+      }
+    ],
+    "interface-name": [
+      true,
+      "never-prefix"
+    ],
+    "member-access": [
+      true,
+      "no-public"
+    ],
+    "no-var-requires": false,
+    "no-console": false,
+    "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
+    "callable-types": true,
+    "variable-name": [
+      true,
+      "ban-keywords"
+    ],
+    "eofline": false,
+    "object-literal-sort-keys": false
+  },
+  "rulesDirectory": []
+}
