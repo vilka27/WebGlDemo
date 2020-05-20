@@ -4,7 +4,8 @@
   "description": "",
   "main": "webgl-demo.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "dist": "tsc typescript/index.ts --outFile bundle/dist.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,8 @@
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2"
-  }
+    "eslint-plugin-import": "^2.20.2",
+    "typescript": "^3.9.3"
+  },
+  "dependencies": {}
 }
