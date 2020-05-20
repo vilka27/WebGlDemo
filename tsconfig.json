@@ -2,8 +2,7 @@
     "compilerOptions": {
         "target": "ESNext",
         "module": "system",
-        "outFile": "bundle/dist.js",
-        
+        "outFile": "bundle/dist.js"
     },
     "exclude": ["wwwroot", "node_modules"]
 }
