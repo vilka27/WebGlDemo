@@ -6,7 +6,6 @@ function loadShader(gl, type, source) {
     const shader = gl.createShader(type);
 
     gl.shaderSource(shader, source);
-
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -53,6 +52,25 @@ function tryDetectError(gl) {
 }
 function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
     // second draw
+    {
+        const numComponents = 1;
+        const type = gl.FLOAT;
+        const normalize = true;
+        const stride = 0;
+        const offset = 0;
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer.normales);
+        gl.vertexAttribPointer(
+            pInfo.attribLocations.vertexNorm,
+            numComponents,
+            type,
+            normalize,
+            stride,
+            offset,
+        );
+        gl.enableVertexAttribArray(
+            pInfo.attribLocations.vertexNorm,
+        );
+    }
     {
         const numComponents = 3;
         const type = gl.FLOAT;
@@ -101,32 +119,30 @@ function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
         gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
 }
+function drawCube(gl, buffers, programInfo) {
+    const modelViewMatrix = window.mat4.create();
+    window.mat4.translate(modelViewMatrix, // destination matrix
+        modelViewMatrix, // matrix to translate
+        [-0.0, 0.0, -6.0]); // amount to translate
+    window.mat4.rotate(modelViewMatrix, // destination matrix
+        modelViewMatrix, // matrix to rotate
+        cubeRotation, // amount to rotate in radians
+        [0, 0, 1]); // axis to rotate around (Z)
+    window.mat4.rotate(modelViewMatrix, // destination matrix
+        modelViewMatrix, // matrix to rotate
+        cubeRotation * 0.7, // amount to rotate in radians
+        [0, 1, 0]); // axis to rotate around (X)
+
+    drawObject(gl, modelViewMatrix, 36, buffers[0], programInfo);
+}
+function drawOcto(gl, buffers, programInfo) {
+    const modelViewMatrix2 = window.mat4.create();
+    window.mat4.translate(modelViewMatrix2, // destination matrix
+        modelViewMatrix2, // matrix to translate
+        [-1.0, 1.0, -5.0]); // amount to translate
+    drawObject(gl, modelViewMatrix2, 24, buffers[1], programInfo);
+}
 function drawScene(gl, programInfo, buffers, deltaTime) {
-    function drawCube() {
-        const modelViewMatrix = window.mat4.create();
-        window.mat4.translate(modelViewMatrix, // destination matrix
-            modelViewMatrix, // matrix to translate
-            [-0.0, 0.0, -6.0]); // amount to translate
-        window.mat4.rotate(modelViewMatrix, // destination matrix
-            modelViewMatrix, // matrix to rotate
-            cubeRotation, // amount to rotate in radians
-            [0, 0, 1]); // axis to rotate around (Z)
-        window.mat4.rotate(modelViewMatrix, // destination matrix
-            modelViewMatrix, // matrix to rotate
-            cubeRotation * 0.7, // amount to rotate in radians
-            [0, 1, 0]); // axis to rotate around (X)
-
-
-        drawObject(gl, modelViewMatrix, 36, buffers[0], programInfo);
-    }
-
-    function drawOcto() {
-        const modelViewMatrix2 = window.mat4.create();
-        window.mat4.translate(modelViewMatrix2, // destination matrix
-            modelViewMatrix2, // matrix to translate
-            [-1.0, 1.0, -5.0]); // amount to translate
-        drawObject(gl, modelViewMatrix2, 24, buffers[1], programInfo);
-    }
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
     gl.enable(gl.DEPTH_TEST); // Enable depth testing
@@ -154,18 +170,48 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
         projectionMatrix,
     );
 
-    drawCube();
-    drawOcto();
+    drawCube(gl, buffers, programInfo);
+    drawOcto(gl, buffers, programInfo);
 
     cubeRotation += deltaTime;
-
 
     tryDetectError(gl);
 }
 
-function initBuffers(gl) {
+function createSimpleBuffer(gl, positions, indices, color, normales) {
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    const colorBuffer = gl.createBuffer();
+    const colors = (new Array(Math.ceil(positions.length / 3))).fill(color, 0).flat();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+    const normBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normales), gl.STATIC_DRAW);
+
+    return {
+        position: positionBuffer,
+        color: colorBuffer,
+        indices: indexBuffer,
+        normales: normBuffer,
+    };
+}
+function cubeBuffer(gl) {
+    const indices = [
+        0, 2, 3, 0, 1, 2, // front
+        4, 5, 6, 4, 6, 7, // back
+        8, 9, 10, 8, 10, 11, // top
+        12, 13, 14, 12, 14, 15, // bottom
+        16, 17, 18, 16, 18, 19, // right
+        20, 21, 22, 20, 22, 23, // left
+    ];
     const positions = [
         -1.0, -1.0, 1.0, // (x, y, z) - 1 вершина
         1.0, -1.0, 1.0,
@@ -197,68 +243,21 @@ function initBuffers(gl) {
         -1.0, 1.0, 1.0,
         -1.0, 1.0, -1.0,
     ];
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-    const faceColors = [
-        [1.0, 1.0, 1.0, 1.0], // Front face: white - (r,g,b,a)
-        [1.0, 0.0, 0.0, 1.0], // Back face: red
-        [0.0, 1.0, 0.0, 1.0], // Top face: green
-        [0.0, 0.0, 1.0, 1.0], // Bottom face: blue
-        [1.0, 1.0, 0.0, 1.0], // Right face: yellow
-        [1.0, 0.0, 1.0, 1.0], // Left face: purple
+    const normales = [
+        0.2, 0.2, 0.2, 0.2,
+
+        0.3, 0.3, 0.3, 0.3,
+
+        2, 2, 2, 2,
+
+        0, 0, 0, 0,
+
+        0.7, 0.7, 0.7, 0.7,
+
+        0.5, 0.5, 0.5, 0.5,
     ];
-    let colors = [];
-    for (let j = 0; j < faceColors.length; ++j) {
-        const c = faceColors[j];
-        colors = colors.concat(c, c, c, c);
-    }
-    const colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    const indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    const indices = [
-        0, 2, 3, 0, 1, 2, // front
-        4, 5, 6, 4, 6, 7, // back
-        8, 9, 10, 8, 10, 11, // top
-        12, 13, 14, 12, 14, 15, // bottom
-        16, 17, 18, 16, 18, 19, // right
-        20, 21, 22, 20, 22, 23, // left
-
-    ];
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-    return {
-        position: positionBuffer,
-        color: colorBuffer,
-        indices: indexBuffer,
-    };
+    return createSimpleBuffer(gl, positions, indices, [1, 1, 0, 1], normales);
 }
-
-function createSimpleBuffer(gl, positions, indices, color, normales) {
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-    const colorBuffer = gl.createBuffer();
-    const colors = (new Array(Math.ceil(positions.length / 3))).fill(color, 0).flat();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-    const indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-
-    const normBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, normBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normales), gl.STATIC_DRAW);
-
-    return {
-        position: positionBuffer,
-        color: colorBuffer,
-        indices: indexBuffer,
-        normales: normBuffer,
-    };
-}
-
 function octoBuffer(gl) {
     const i = [
         0, 3, 4,
@@ -271,14 +270,12 @@ function octoBuffer(gl) {
         0, 1, 5,
     ];
     const n = [
-        0.5,
-        0.5,
-        0.5,
+        2,
         0.5,
         0,
-        0,
-        0,
-        0,
+        0.5,
+        0.7,
+        0.3,
     ];
     const p = [
         1, 0, 0, // A
@@ -306,23 +303,25 @@ function main() {
     const vsSource = `
     attribute vec4 aVertexPosition;
     attribute vec4 aVertexColor;
+    attribute lowp float aVertexNorm;
     uniform mat4 uModelViewMatrix;
     uniform mat4 uProjectionMatrix;
-    varying lowp vec4 positionForShadow;
+    varying lowp float positionForShadow;
     varying lowp vec4 vColoraaa;
     void main(void) {
       gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
       vColoraaa = aVertexColor;
-    positionForShadow = aVertexPosition;
+      positionForShadow = aVertexNorm;
     }
   `; // return gl_Position
 
 
     const fsSource = `
-    //varying lowp vec4 vColoraaa;
-  varying lowp vec4 positionForShadow;
+    varying lowp vec4 vColoraaa;
+    varying lowp float positionForShadow;
     void main(void) {
-        gl_FragColor =  positionForShadow;
+        lowp vec3 rgb = positionForShadow * vColoraaa.rgb;
+        gl_FragColor = vec4(rgb, 1.0);
     }
   `; // return gl_FragColor
 
@@ -333,15 +332,15 @@ function main() {
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
             vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+            vertexNorm: gl.getAttribLocation(shaderProgram, 'aVertexNorm'),
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
             modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
         },
     };
-    tryDetectError(gl);
 
-    const buffers = [initBuffers(gl), octoBuffer(gl)];
+    const buffers = [cubeBuffer(gl), octoBuffer(gl)];
     let then = 0;
 
     function render(now) {
