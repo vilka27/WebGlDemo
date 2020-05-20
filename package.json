@@ -5,7 +5,7 @@
   "main": "webgl-demo.js",
   "scripts": {
     "test": "test",
-    "dist": "tsc typescript/index.ts --outFile bundle/dist.js"
+    "dist": "tsc"
   },
   "repository": {
     "type": "git",
