@@ -1,9 +1,8 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "system",
-        "outFile": "bundle/dist.js",
-        
+        "module": "AMD",
+        "outFile": "bundle/dist.js"
     },
     "exclude": ["wwwroot", "node_modules"]
 }

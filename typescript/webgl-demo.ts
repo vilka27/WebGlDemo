@@ -1,39 +1,9 @@
+import  { Shader } from './shader';
+import  { DefaultShader } from './defaultShader';
+
 let mat4 = (window as any).mat4;
 let cubeRotation = 0.0;
 
-
-function loadShader(gl, type, source) {
-    const shader = gl.createShader(type);
-
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert(`An error occurred compiling the shaders: ${gl.getShaderInfoLog(shader)}`);
-        gl.deleteShader(shader);
-        return null;
-    }
-
-    return shader;
-}
-
-function initShaderProgram(gl, vsSource, fsSource) {
-    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
-    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
-
-    const shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
-
-
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert(`Unable to initialize the shader program: ${gl.getProgramInfoLog(shaderProgram)}`);
-        return null;
-    }
-
-    return shaderProgram;
-}
 function tryDetectError(gl) {
     const errorCode = gl.getError();
     if (errorCode !== gl.NO_ERROR) {
@@ -50,7 +20,9 @@ function tryDetectError(gl) {
             .forEach((item) => console.error(`${errorCode} means: ${item}`));
     }
 }
-function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
+function drawObject(gl, viewMatrix, vertexCount, buffer,
+    shader: Shader
+    ) {
     // second draw
     {
         const numComponents = 1;
@@ -60,16 +32,14 @@ function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
         const offset = 0;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer.normales);
         gl.vertexAttribPointer(
-            pInfo.attribLocations.vertexNorm,
+            shader.getAttribute('aVertexNorm'),
             numComponents,
             type,
             normalize,
             stride,
             offset,
         );
-        gl.enableVertexAttribArray(
-            pInfo.attribLocations.vertexNorm,
-        );
+        gl.enableVertexAttribArray(shader.getAttribute('aVertexNorm'));
     }
     {
         const numComponents = 3;
@@ -79,7 +49,7 @@ function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
         const offset = 0;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer.position);
         gl.vertexAttribPointer(
-            pInfo.attribLocations.vertexPosition,
+            shader.getAttribute('aVertexPosition'),
             numComponents,
             type,
             normalize,
@@ -87,7 +57,7 @@ function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
             offset,
         );
         gl.enableVertexAttribArray(
-            pInfo.attribLocations.vertexPosition,
+            shader.getAttribute('aVertexPosition'),
         );
     } {
         const numComponents = 4;
@@ -97,7 +67,7 @@ function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
         const offset = 0;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer.color);
         gl.vertexAttribPointer(
-            pInfo.attribLocations.vertexColor,
+            shader.getAttribute('aVertexColor'),
             numComponents,
             type,
             normalize,
@@ -105,21 +75,18 @@ function drawObject(gl, viewMatrix, vertexCount, buffer, pInfo) {
             offset,
         );
         gl.enableVertexAttribArray(
-            pInfo.attribLocations.vertexColor,
+            shader.getAttribute('aVertexColor'),
         );
     }
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer.indices);
-    gl.uniformMatrix4fv(
-        pInfo.uniformLocations.modelViewMatrix,
-        false,
-        viewMatrix,
-    ); {
+    shader.setMatrix('uModelViewMatrix', viewMatrix);
+     {
         const type = gl.UNSIGNED_SHORT;
         const offset = 0;
         gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
     }
 }
-function drawCube(gl, buffers, programInfo) {
+function drawCube(gl, buffers, shader: Shader) {
     const modelViewMatrix = mat4.create();
     mat4.translate(modelViewMatrix, // destination matrix
         modelViewMatrix, // matrix to translate
@@ -133,16 +100,21 @@ function drawCube(gl, buffers, programInfo) {
         cubeRotation * 0.7, // amount to rotate in radians
         [0, 1, 0]); // axis to rotate around (X)
 
-    drawObject(gl, modelViewMatrix, 36, buffers[0], programInfo);
+    drawObject(gl, modelViewMatrix, 36, buffers[0], shader);
 }
-function drawOcto(gl, buffers, programInfo) {
+function drawOcto(gl, buffers, shader: Shader) {
     const modelViewMatrix2 = mat4.create();
     mat4.translate(modelViewMatrix2, // destination matrix
         modelViewMatrix2, // matrix to translate
         [-1.0, 1.0, -5.0]); // amount to translate
-    drawObject(gl, modelViewMatrix2, 24, buffers[1], programInfo);
+    drawObject(gl, modelViewMatrix2, 24, buffers[1], shader);
 }
-function drawScene(gl, programInfo, buffers, deltaTime) {
+function drawScene(
+    gl,
+    shader: Shader,
+    buffers,
+    deltaTime
+) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
     gl.enable(gl.DEPTH_TEST); // Enable depth testing
@@ -162,16 +134,11 @@ function drawScene(gl, programInfo, buffers, deltaTime) {
         zNear,
         zFar);
 
-    gl.useProgram(programInfo.program);
+    shader.useProgram();
+    shader.setMatrix('uProjectionMatrix', projectionMatrix);
 
-    gl.uniformMatrix4fv(
-        programInfo.uniformLocations.projectionMatrix,
-        false,
-        projectionMatrix,
-    );
-
-    drawCube(gl, buffers, programInfo);
-    drawOcto(gl, buffers, programInfo);
+    drawCube(gl, buffers, shader);
+    drawOcto(gl, buffers, shader);
 
     cubeRotation += deltaTime;
 
@@ -297,48 +264,7 @@ function main() {
         return;
     }
 
-    // TODO: USE aVertexColor, OTHERVISE OPTIMISING COMPILER
-    // REMOVES IT, AND THEN WE GOT AN ERROR WHEN TRYING
-    // TO BIND COLOR BUFFER
-    const vsSource = `
-    attribute vec4 aVertexPosition;
-    attribute vec4 aVertexColor;
-    attribute lowp float aVertexNorm;
-    uniform mat4 uModelViewMatrix;
-    uniform mat4 uProjectionMatrix;
-    varying lowp float positionForShadow;
-    varying lowp vec4 vColoraaa;
-    void main(void) {
-      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
-      vColoraaa = aVertexColor;
-      positionForShadow = aVertexNorm;
-    }
-  `; // return gl_Position
-
-
-    const fsSource = `
-    varying lowp vec4 vColoraaa;
-    varying lowp float positionForShadow;
-    void main(void) {
-        lowp vec3 rgb = positionForShadow * vColoraaa.rgb;
-        gl_FragColor = vec4(rgb, 1.0);
-    }
-  `; // return gl_FragColor
-
-    const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
-
-    const programInfo = {
-        program: shaderProgram,
-        attribLocations: {
-            vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-            vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
-            vertexNorm: gl.getAttribLocation(shaderProgram, 'aVertexNorm'),
-        },
-        uniformLocations: {
-            projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-            modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-        },
-    };
+    const shader = new DefaultShader(gl);
 
     const buffers = [cubeBuffer(gl), octoBuffer(gl)];
     let then = 0;
@@ -348,10 +274,10 @@ function main() {
         const deltaTime = newNow - then;
         then = newNow;
 
-        drawScene(gl, programInfo, buffers, deltaTime);
+        drawScene(gl, shader, buffers, deltaTime);
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
 }
 
-main();
+export default main;
