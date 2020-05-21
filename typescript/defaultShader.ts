@@ -26,8 +26,8 @@ export class DefaultShader extends Shader {
               lowp vec3 rgb = positionForShadow * vColoraaa.rgb;
               gl_FragColor = vec4(rgb, 1.0);
           }
-        `
-        )
+        `,
+        );
     }
 
 }

@@ -2,9 +2,9 @@ import  { SimpleCache } from './cache';
 
 export class Shader {
 
-    private loadShader(type, source): WebGLShader {
-        const gl = this.gl
-        const shader = gl.createShader(type);+
+    private loadShader(type: number, source: string): WebGLShader {
+        const gl = this.gl;
+        const shader = gl.createShader(type);
     
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
@@ -13,23 +13,23 @@ export class Shader {
             gl.deleteShader(shader);
             throw new Error(
                 `An error occurred compiling the shaders: 
-                ${gl.getShaderInfoLog(shader)}`
+                ${gl.getShaderInfoLog(shader)}`,
             );
         }
     
         return shader;
     }
 
-    private readonly vertexShader: WebGLShader
-    private readonly fragmentShader: WebGLShader
-    private readonly program: WebGLProgram
-    private readonly attributesCache: SimpleCache<number>
-    private readonly uniformsCache: SimpleCache<WebGLUniformLocation>
+    private readonly vertexShader: WebGLShader;
+    private readonly fragmentShader: WebGLShader;
+    private readonly program: WebGLProgram;
+    private readonly attributesCache: SimpleCache<number>;
+    private readonly uniformsCache: SimpleCache<WebGLUniformLocation>;
 
     constructor(
         private gl: WebGLRenderingContext,
         private vertexSource: string,
-        private fragmentSource: string
+        private fragmentSource: string,
     ) {
         this.gl = gl;
         this.vertexShader = this.loadShader(gl.VERTEX_SHADER, vertexSource);
@@ -42,16 +42,16 @@ export class Shader {
         if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
             throw new Error(
                 `Unable to initialize the shader program: `+
-                gl.getProgramInfoLog(this.program)
+                gl.getProgramInfoLog(this.program),
             );
         }
 
         this.attributesCache = new SimpleCache((name) => 
-            this.gl.getAttribLocation(this.program, name)
-        )
+            this.gl.getAttribLocation(this.program, name),
+        );
         this.uniformsCache = new SimpleCache((name) => 
-            this.gl.getUniformLocation(this.program, name)
-        )
+            this.gl.getUniformLocation(this.program, name),
+        );
     }
 
     getAttribute(name: string): number {
@@ -64,7 +64,7 @@ export class Shader {
 
     setMatrix(
         name: string,
-        value: any /* TODO: strict type */
+        value: any, /* TODO: strict type */
     ) {
         this.gl.uniformMatrix4fv(
             this.uniformsCache.get(name),
