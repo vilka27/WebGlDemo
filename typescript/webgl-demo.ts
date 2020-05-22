@@ -1,6 +1,9 @@
-import  { Shader } from './shader';
-import  { DefaultShader } from './defaultShader';
-import { Model } from './model';
+import  { Shader } from './shaders/shader';
+import  { DefaultShader } from './shaders/defaultShader';
+import { Model } from './shapes/model';
+import { Cube } from './shapes/cube';
+import { Octo } from './shapes/octo';
+import { Octo2 } from './shapes/octo2';
 
 let mat4 = (window as any).mat4;
 let cubeRotation = 0.0;
@@ -32,22 +35,38 @@ function getCubeMatrix(){
         [0, 0, 1]); // axis to rotate around (Z)
     mat4.rotate(modelViewMatrix, // destination matrix
         modelViewMatrix, // matrix to rotate
-        cubeRotation * 0.7, // amount to rotate in radians
+        cubeRotation * 0.2, // amount to rotate in radians
         [0, 1, 0]); // axis to rotate around (X)
     return modelViewMatrix;
 }
 function getOctoMatrix(){
-    const modelViewMatrix2 = mat4.create();
-    mat4.translate(modelViewMatrix2, // destination matrix
-        modelViewMatrix2, // matrix to translate
+    const modelViewMatrix = mat4.create();
+
+    mat4.translate(modelViewMatrix, // destination matrix
+        modelViewMatrix, // matrix to translate
         [-1.0, 1.0, -5.0]); // amount to translate
-        return modelViewMatrix2;
+
+    console.log(modelViewMatrix);
+
+    return modelViewMatrix;
+}
+function getOctoMatrix2(){
+    const modelViewMatrix = mat4.create();
+
+    mat4.translate(modelViewMatrix, // destination matrix
+        modelViewMatrix, // matrix to translate
+        [-4.0, 1.0, -8.0]); // amount to translate
+
+    console.log(modelViewMatrix);
+
+    return modelViewMatrix;
 }
 function drawScene(
     gl: WebGLRenderingContext,
     shader: Shader,
     deltaTime: number,
     models: Model[],
+    time: number,
 ) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
     gl.clearDepth(1.0); // Clear everything
@@ -60,9 +79,8 @@ function drawScene(
     const canvas = gl.canvas as HTMLCanvasElement;
     const aspect = canvas.clientWidth / canvas.clientHeight;
     const zNear = 0.1;
-    const zFar = 100.0;
+    const zFar = 100.0;    
     const projectionMatrix = mat4.create();
-
     mat4.perspective(projectionMatrix,
         fieldOfView,
         aspect,
@@ -73,76 +91,26 @@ function drawScene(
 
     shader.setMatrix('uProjectionMatrix', projectionMatrix);
 
+    const viewMatrix = mat4.create();
+    shader.setMatrix('uViewMatrix', viewMatrix);
+
+    const circleTime = (time % 8) / 8;
+    const piTime = Math.PI * 2 * circleTime;
+    const sinTime = Math.sin(piTime);
+    const cosTime = Math.cos(piTime);
+
+    shader.setVector4f(
+        'lightDirection',
+        [sinTime, cosTime, 0.8, 0.0],
+    );
+
     models[0].draw(getCubeMatrix(),shader);
     models[1].draw(getOctoMatrix(),shader);
+    models[2].draw(getOctoMatrix2(),shader);
 
     cubeRotation += deltaTime;
 
     tryDetectError(gl);
-}
-function getCubeModel(gl:WebGLRenderingContext):Model{
-    const indices = [
-        0, 2, 3, 0, 1, 2, // front
-        4, 5, 6, 4, 6, 7, // back
-        8, 9, 10, 8, 10, 11, // top
-        12, 13, 14, 12, 14, 15, // bottom
-        16, 17, 18, 16, 18, 19, // right
-        20, 21, 22, 20, 22, 23, // left
-    ];
-    const positions = [
-        -1.0, -1.0, 1.0, // (x, y, z) - 1 вершина
-        1.0, -1.0, 1.0,
-        1.0, 1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        // Back face
-        -1.0, -1.0, -1.0,
-        -1.0, 1.0, -1.0,
-        1.0, 1.0, -1.0,
-        1.0, -1.0, -1.0,
-        // Top face
-        -1.0, 1.0, -1.0,
-        -1.0, 1.0, 1.0,
-        1.0, 1.0, 1.0,
-        1.0, 1.0, -1.0,
-        // Bottom face
-        -1.0, -1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, -1.0, 1.0,
-        -1.0, -1.0, 1.0,
-        // Right fac
-        1.0, -1.0, -1.0,
-        1.0, 1.0, -1.0,
-        1.0, 1.0, 1.0,
-        1.0, -1.0, 1.0,
-        // Left face
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0, 1.0,
-        -1.0, 1.0, 1.0,
-        -1.0, 1.0, -1.0,
-    ];
-    return new Model(gl,positions,indices,[1,1,0,1]);
-}
-function getOctoModel(gl:WebGLRenderingContext):Model{
-    const i = [
-        0, 3, 4,
-        0, 1, 4,
-        2, 3, 4,
-        1, 2, 4,
-        0, 3, 5,
-        2, 3, 5,
-        1, 2, 5,
-        0, 1, 5,
-    ];
-
-    const p = [
-        1, 0, 0, // A
-        0, -1, 0, // B
-        -1, 0, 0, // C
-        0, 1, 0, // D
-        0, 0, -1, // E
-        0, 0, 1, // F
-    ];
-    return new Model(gl,p,i,[1.0, 0.0, 0.0, 1.0]);
 }
 function initRenderLoop(gl:WebGLRenderingContext) {
     const shader = new DefaultShader(gl);
@@ -153,9 +121,13 @@ function initRenderLoop(gl:WebGLRenderingContext) {
         const deltaTime = newNow - then;
         then = newNow;
 
-        const models = [ getCubeModel(gl), getOctoModel(gl) ];
+        const cubeModel = new Cube(gl);
+        const octoModel = new Octo(gl);
+        const octoModel2 = new Octo2(gl);
 
-        drawScene( gl, shader, deltaTime, models );
+        const models = [ cubeModel, octoModel, octoModel2 ];
+
+        drawScene( gl, shader, deltaTime, models, newNow );
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
