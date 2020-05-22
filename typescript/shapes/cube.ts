@@ -75,12 +75,17 @@ export class Cube extends Model {
             -1, 0, 0,
             -1, 0, 0,
         ];
+
+        const color = [1,1,0,1];
+
         super(
             gl,
             positions,
             normals,
             indices,
-            [1,1,0,1],
+            (new Array(Math.ceil(positions.length / 3)))
+                .fill(color, 0)
+                .flat(),
         );
     }
 

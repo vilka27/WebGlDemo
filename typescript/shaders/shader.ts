@@ -1,4 +1,5 @@
 import  { SimpleCache } from '../utils/cache';
+import  { Mat4, Vec3, Vec4 } from '../matrices';
 
 export class Shader {
 
@@ -69,7 +70,7 @@ export class Shader {
 
     setMatrix(
         name: string,
-        value: any, /* TODO: strict type */
+        value: Mat4, /* TODO: strict type */
     ) {
         this.gl.uniformMatrix4fv(
             this.uniformsCache.get(name),
@@ -78,11 +79,11 @@ export class Shader {
         );
     }
 
-    setVector4f(name: string, value: number[]) {
-        this.gl.uniform4fv(this.uniformsCache.get(name), value,);
+    setVector4f(name: string, value: Vec4) {
+        this.gl.uniform4fv(this.uniformsCache.get(name), value);
     }
-    setVector3f(name: string, value: number[]) {
-        this.gl.uniform3fv(this.uniformsCache.get(name), value,);
+    setVector3f(name: string, value: Vec3) {
+        this.gl.uniform3fv(this.uniformsCache.get(name), value);
     }
 
 }
