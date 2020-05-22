@@ -2,10 +2,13 @@ import  { Shader } from './shaders/shader';
 import  { DefaultShader } from './shaders/defaultShader';
 import { Model } from './shapes/model';
 import { Cube } from './shapes/cube';
-import { Octo } from './shapes/octo';
+import { Sphere } from './shapes/sphere';
 import { Octo2 } from './shapes/octo2';
+import { Vec4, Mat4 } from './matrices';
+import { 
+    identity, translate, scale, rotate, perspective
+ } from './matrices';
 
-let mat4 = (window as any).mat4;
 let cubeRotation = 0.0;
 
 function tryDetectError(gl:WebGLRenderingContext) {
@@ -24,42 +27,26 @@ function tryDetectError(gl:WebGLRenderingContext) {
             .forEach((item) => console.error(`${errorCode} means: ${item}`));
     }
 }
-function getCubeMatrix(){
-    const modelViewMatrix = mat4.create();
-    mat4.translate(modelViewMatrix, // destination matrix
-        modelViewMatrix, // matrix to translate
-        [-0.0, 0.0, -6.0]); // amount to translate
-    mat4.rotate(modelViewMatrix, // destination matrix
-        modelViewMatrix, // matrix to rotate
-        cubeRotation, // amount to rotate in radians
-        [0, 0, 1]); // axis to rotate around (Z)
-    mat4.rotate(modelViewMatrix, // destination matrix
-        modelViewMatrix, // matrix to rotate
-        cubeRotation * 0.2, // amount to rotate in radians
-        [0, 1, 0]); // axis to rotate around (X)
-    return modelViewMatrix;
+function getCubeMatrix() {
+    const modelMatrix = identity();
+    translate(modelMatrix, [2.0, 0.0, -6.0]);
+    rotate(modelMatrix, cubeRotation, [0, 0, 1]);
+    rotate(modelMatrix, cubeRotation * 0.2, [0, 1, 0]);
+    return modelMatrix;
 }
-function getOctoMatrix(){
-    const modelViewMatrix = mat4.create();
 
-    mat4.translate(modelViewMatrix, // destination matrix
-        modelViewMatrix, // matrix to translate
-        [-1.0, 1.0, -5.0]); // amount to translate
-
-    console.log(modelViewMatrix);
-
-    return modelViewMatrix;
+function getOctoMatrix() {
+    const modelMatrix = identity();
+    translate(modelMatrix, [0.0, 1.0, -6.0]);
+    rotate(modelMatrix, cubeRotation * 0.2, [1, 0, 0]);
+    return modelMatrix;
 }
-function getOctoMatrix2(){
-    const modelViewMatrix = mat4.create();
-
-    mat4.translate(modelViewMatrix, // destination matrix
-        modelViewMatrix, // matrix to translate
-        [-4.0, 1.0, -8.0]); // amount to translate
-
-    console.log(modelViewMatrix);
-
-    return modelViewMatrix;
+function getOctoMatrix2() {
+    const modelMatrix = identity();
+    scale(modelMatrix, [2.0, 1.0, 1.0]);
+    translate(modelMatrix,  [-1.0, 1.0, -6.0]);
+    rotate(modelMatrix, cubeRotation * 0.2, [1, 0, 0]);
+    return modelMatrix;
 }
 function drawScene(
     gl: WebGLRenderingContext,
@@ -80,18 +67,18 @@ function drawScene(
     const aspect = canvas.clientWidth / canvas.clientHeight;
     const zNear = 0.1;
     const zFar = 100.0;    
-    const projectionMatrix = mat4.create();
-    mat4.perspective(projectionMatrix,
+    const projectionMatrix = perspective(
         fieldOfView,
         aspect,
         zNear,
-        zFar);
+        zFar
+    );
 
     shader.useProgram();
 
     shader.setMatrix('uProjectionMatrix', projectionMatrix);
 
-    const viewMatrix = mat4.create();
+    const viewMatrix = identity();
     shader.setMatrix('uViewMatrix', viewMatrix);
 
     const circleTime = (time % 8) / 8;
@@ -122,7 +109,7 @@ function initRenderLoop(gl:WebGLRenderingContext) {
         then = newNow;
 
         const cubeModel = new Cube(gl);
-        const octoModel = new Octo(gl);
+        const octoModel = new Sphere(gl);
         const octoModel2 = new Octo2(gl);
 
         const models = [ cubeModel, octoModel, octoModel2 ];

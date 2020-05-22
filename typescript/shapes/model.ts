@@ -13,8 +13,8 @@ export class Model {
         colors: number[]
     ) {
         this.gl = gl;
+        this.indices = indices;
         this.positions = positions.map(a => a * 1.0 );
-        this.indices = indices.map(a => a * 1.0 );
         this.normales = normales.map(a => a * 1.0 );
         this.colors = (new Array(Math.ceil(positions.length / 3)))
             .fill(colors, 0)
@@ -62,7 +62,8 @@ export class Model {
             const normalize = true;
             const stride = 0;
             const offset = 0;
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.normales);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER,
+                this.buffers.normales);
             this.gl.vertexAttribPointer(
                 shader.getAttribute('aVertexNorm'),
                 numComponents,
@@ -81,7 +82,8 @@ export class Model {
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.position);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER,
+                this.buffers.position);
             this.gl.vertexAttribPointer(
                 shader.getAttribute('aVertexPosition'),
                 numComponents,
@@ -99,7 +101,8 @@ export class Model {
             const normalize = false;
             const stride = 0;
             const offset = 0;
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffers.color);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER,
+                this.buffers.color);
             this.gl.vertexAttribPointer(
                 shader.getAttribute('aVertexColor'),
                 numComponents,
@@ -112,12 +115,15 @@ export class Model {
                 shader.getAttribute('aVertexColor'),
             );
         }
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffers.indices);
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, 
+        this.buffers.indices);
         shader.setMatrix('uModelMatrix', viewMatrix);
          {
             const type = this.gl.UNSIGNED_SHORT;
             const offset = 0;
-            this.gl.drawElements(this.gl.TRIANGLES, this.indices.length, type, offset);
+            this.gl.drawElements(this.gl.TRIANGLES,
+                this.indices.length, type, offset
+            );
         }
     }
 }
