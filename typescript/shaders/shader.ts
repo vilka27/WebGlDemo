@@ -1,4 +1,4 @@
-import  { SimpleCache } from './cache';
+import  { SimpleCache } from '../utils/cache';
 
 export class Shader {
 
@@ -10,11 +10,10 @@ export class Shader {
         gl.compileShader(shader);
     
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            const text = `An error occurred compiling the shader: 
+                ${gl.getShaderInfoLog(shader)}`;
             gl.deleteShader(shader);
-            throw new Error(
-                `An error occurred compiling the shaders: 
-                ${gl.getShaderInfoLog(shader)}`,
-            );
+            throw new Error(text);
         }
     
         return shader;
@@ -32,8 +31,14 @@ export class Shader {
         private fragmentSource: string,
     ) {
         this.gl = gl;
-        this.vertexShader = this.loadShader(gl.VERTEX_SHADER, vertexSource);
-        this.fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, fragmentSource);
+        this.vertexShader = this.loadShader(
+            gl.VERTEX_SHADER,
+            vertexSource,
+        );
+        this.fragmentShader = this.loadShader(
+            gl.FRAGMENT_SHADER,
+            fragmentSource,
+        );
 
         this.program = gl.createProgram();
         gl.attachShader(this.program, this.vertexShader);
@@ -71,6 +76,13 @@ export class Shader {
             false,
             value,
         );
+    }
+
+    setVector4f(name: string, value: number[]) {
+        this.gl.uniform4fv(this.uniformsCache.get(name), value,);
+    }
+    setVector3f(name: string, value: number[]) {
+        this.gl.uniform3fv(this.uniformsCache.get(name), value,);
     }
 
 }
