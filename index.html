@@ -3,13 +3,25 @@
     <head>
         <meta charset="utf-8">
         <title>WebGL Demo</title>
-
+        <style>
+            html {
+                background: #333;
+                display: flex;
+                width: 100vw;
+                height: 100vh;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
     </head>
 
     <body>
-        <canvas id="glcanvas" width="640" height="480"></canvas>
+        <canvas
+            id="glcanvas"
+            width="1280"
+            height="720"
+        ></canvas>
     </body>
-    <script src="lib/gl-matrix.js"></script>
     <script src="lib/require.js"></script>
     <script src="bundle/dist.js"></script>
     <script>

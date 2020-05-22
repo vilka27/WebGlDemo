@@ -18,39 +18,39 @@ export class Octo2 extends Model {
             21, 22, 23,
         ];
     
-        const p = [
+        const positions = [
             
             0,  0, 1,
             0, -1, 0,
             1,  0, 0,
 
             0, 0, 1,
-            0, 1, 0,
             1, 0, 0,
+            0, 1, 0,
 
             0,  0, 1,
-            0, -1, 0,
             -1,  0, 0,
+            0, -1, 0,
 
             0, 0, 1,
             0, 1, 0,
             -1, 0, 0,
 
             0,  0, -1,
-            0, -1, 0,
             1,  0, 0,
+            0, -1, 0,
 
+            1, 0, 0,
             0, 0, -1,
             0, 1, 0,
-            1, 0, 0,
 
             0,  0, -1,
             0, -1, 0,
             -1,  0, 0,
 
             0, 0, -1,
-            0, 1, 0,
             -1, 0, 0,
+            0, 1, 0,
         ];
 
         const normales = [
@@ -88,12 +88,16 @@ export class Octo2 extends Model {
             -1, 1, -1,
         ];
 
+        const color = [0.0, 1.0, 0.0, 1.0];
+
         super(
             gl,
-            p,
+            positions,
             normales,
             i,
-            [1.0, 0.0, 0.0, 1.0],
+            (new Array(Math.ceil(positions.length / 3)))
+                .fill(color, 0)
+                .flat(),
         );
     }
 

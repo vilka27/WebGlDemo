@@ -80,10 +80,10 @@ export class Shader {
     }
 
     setVector4f(name: string, value: Vec4) {
-        this.gl.uniform4fv(this.uniformsCache.get(name), value,);
+        this.gl.uniform4fv(this.uniformsCache.get(name), value);
     }
     setVector3f(name: string, value: Vec3) {
-        this.gl.uniform3fv(this.uniformsCache.get(name), value,);
+        this.gl.uniform3fv(this.uniformsCache.get(name), value);
     }
 
 }

@@ -1,5 +1,5 @@
 import { Model } from './model';
-import { sum, normalize } from '../matrices';
+import { normalize, sum } from '../matrices';
 
 function genTriangles(initial: number[]): number[] {
     let newArray: number[][] = [];
@@ -8,17 +8,17 @@ function genTriangles(initial: number[]): number[] {
         const a = [
             initial[i+0],
             initial[i+1],
-            initial[i+2]
+            initial[i+2],
         ];
         const b = [
             initial[i+3],
             initial[i+4],
-            initial[i+5]
+            initial[i+5],
         ];
         const c = [
             initial[i+6],
             initial[i+7],
-            initial[i+8]
+            initial[i+8],
         ];
 
         const d = normalize(sum(a, b));
@@ -41,7 +41,7 @@ function genTriangles(initial: number[]): number[] {
         newArray.push(e);
         newArray.push(f);
     }
-    return newArray.flat()
+    return newArray.flat();
 }
 
 function genNormales(triangles: number[]): number[] {
@@ -50,17 +50,17 @@ function genNormales(triangles: number[]): number[] {
         const a = [
             triangles[i+0],
             triangles[i+1],
-            triangles[i+2]
+            triangles[i+2],
         ];
         const b = [
             triangles[i+3],
             triangles[i+4],
-            triangles[i+5]
+            triangles[i+5],
         ];
         const c = [
             triangles[i+6],
             triangles[i+7],
-            triangles[i+8]
+            triangles[i+8],
         ];
         const avg = (sum(a, sum(b, c)));
         normales.push(avg);
@@ -81,35 +81,35 @@ export class Sphere extends Model {
             1,  0, 0,
 
             0, 0, 1,
-            0, 1, 0,
             1, 0, 0,
+            0, 1, 0,
 
             0,  0, 1,
-            0, -1, 0,
             -1,  0, 0,
+            0, -1, 0,
 
             0, 0, 1,
             0, 1, 0,
             -1, 0, 0,
 
             0,  0, -1,
-            0, -1, 0,
             1,  0, 0,
+            0, -1, 0,
 
+            1, 0, 0,
             0, 0, -1,
             0, 1, 0,
-            1, 0, 0,
 
             0,  0, -1,
             0, -1, 0,
             -1,  0, 0,
 
             0, 0, -1,
-            0, 1, 0,
             -1, 0, 0,
+            0, 1, 0,
         ];
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 5; i++) {
             itri = genTriangles(itri);
         }
 
@@ -119,13 +119,16 @@ export class Sphere extends Model {
         for (let i = 0; i < normales.length; i+=3) {
             indices.push(i/3);
         }
+        const color = [1.0, 0.0, 0.0, 1.0];
 
         super(
             gl,
             itri,
             normales,
             indices,
-            [0.0, 1.0, 0.0, 1.0],
+            (new Array(Math.ceil(itri.length / 3)))
+                .fill(color, 0)
+                .flat(),
         );
     }
 

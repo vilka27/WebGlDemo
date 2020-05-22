@@ -25,7 +25,7 @@ export function identity() {
 
 export function translate(
     matrix: Mat4,
-    vector: Vec3
+    vector: Vec3,
 ) {
     const x = vector[0];
     const y = vector[1];
@@ -42,7 +42,7 @@ export function translate(
 
 export function scale(
     matrix: Mat4,
-    scale: Vec3
+    scale: Vec3,
 ) {
     const x = scale[0];
     const y = scale[1];
@@ -64,7 +64,7 @@ export function scale(
 export function rotate(
     matrix: Mat4,
     rad: number,
-    axis: Vec3
+    axis: Vec3,
 ) {
     let x = axis[0];
     let y = axis[1];
@@ -121,7 +121,7 @@ export function perspective(
     fovy: number,
     aspect: number,
     near: number,
-    far: number
+    far: number,
 ): Mat4 {
     var f = 1.0 / Math.tan(fovy / 2);
     var nf = 1 / (near - far);
@@ -146,7 +146,7 @@ export function perspective(
 }
 
 export function normalize(
-    vector: Vec4
+    vector: Vec4,
 ): Vec4 {
     let sum = 0;
     for (let i = 0; i < vector.length; i++) {
@@ -161,7 +161,7 @@ export function normalize(
 
 export function sum(
     a: Vec4,
-    b: Vec4
+    b: Vec4,
 ): Vec4 {
     var out = new Array<number>(Math.min(a.length, b.length));
     for (let i = 0; i < out.length; i++) {

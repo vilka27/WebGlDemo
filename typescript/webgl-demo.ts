@@ -4,9 +4,9 @@ import { Model } from './shapes/model';
 import { Cube } from './shapes/cube';
 import { Sphere } from './shapes/sphere';
 import { Octo2 } from './shapes/octo2';
-import { Vec4, Mat4 } from './matrices';
+import { Mat4, Vec4 } from './matrices';
 import { 
-    identity, translate, scale, rotate, perspective
+    identity, perspective, rotate, scale, translate,
  } from './matrices';
 
 let cubeRotation = 0.0;
@@ -71,7 +71,7 @@ function drawScene(
         fieldOfView,
         aspect,
         zNear,
-        zFar
+        zFar,
     );
 
     shader.useProgram();
@@ -103,16 +103,19 @@ function initRenderLoop(gl:WebGLRenderingContext) {
     const shader = new DefaultShader(gl);
     let then = 0;
 
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+
+    const cubeModel = new Cube(gl);
+    const octoModel = new Sphere(gl);
+    const octoModel2 = new Octo2(gl);
+
+    const models = [ cubeModel, octoModel, octoModel2 ];
+
     function render(now: number) {
         const newNow = 0.001 * now; // convert to seconds
         const deltaTime = newNow - then;
         then = newNow;
-
-        const cubeModel = new Cube(gl);
-        const octoModel = new Sphere(gl);
-        const octoModel2 = new Octo2(gl);
-
-        const models = [ cubeModel, octoModel, octoModel2 ];
 
         drawScene( gl, shader, deltaTime, models, newNow );
         requestAnimationFrame(render);
