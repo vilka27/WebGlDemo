@@ -1,29 +1,29 @@
 import { Model } from './model';
-import { normalize, sum } from '../matrices';
+import { normalizeVec3, sum, Vec3 } from '../matrices';
 
 function genTriangles(initial: number[]): number[] {
-    let newArray: number[][] = [];
+    const newArray: number[][] = [];
     for (let i = 0; i < initial.length; i += 9) {
 
-        const a = [
-            initial[i+0],
-            initial[i+1],
-            initial[i+2],
+        const a: Vec3 = [
+            initial[i + 0],
+            initial[i + 1],
+            initial[i + 2],
         ];
-        const b = [
-            initial[i+3],
-            initial[i+4],
-            initial[i+5],
+        const b: Vec3  = [
+            initial[i + 3],
+            initial[i + 4],
+            initial[i + 5],
         ];
-        const c = [
-            initial[i+6],
-            initial[i+7],
-            initial[i+8],
+        const c: Vec3  = [
+            initial[i + 6],
+            initial[i + 7],
+            initial[i + 8],
         ];
 
-        const d = normalize(sum(a, b));
-        const e = normalize(sum(b, c));
-        const f = normalize(sum(a, c));
+        const d: Vec3 = normalizeVec3(sum(a, b));
+        const e: Vec3 = normalizeVec3(sum(b, c));
+        const f: Vec3 = normalizeVec3(sum(a, c));
 
         newArray.push(a);
         newArray.push(d);
@@ -45,22 +45,22 @@ function genTriangles(initial: number[]): number[] {
 }
 
 function genNormales(triangles: number[]): number[] {
-    let normales: number[][] = [];
+    const normales: number[][] = [];
     for (let i = 0; i < triangles.length; i += 9) {
-        const a = [
-            triangles[i+0],
-            triangles[i+1],
-            triangles[i+2],
+        const a: Vec3  = [
+            triangles[i + 0],
+            triangles[i + 1],
+            triangles[i + 2],
         ];
-        const b = [
-            triangles[i+3],
-            triangles[i+4],
-            triangles[i+5],
+        const b: Vec3  = [
+            triangles[i + 3],
+            triangles[i + 4],
+            triangles[i + 5],
         ];
-        const c = [
-            triangles[i+6],
-            triangles[i+7],
-            triangles[i+8],
+        const c: Vec3  = [
+            triangles[i + 6],
+            triangles[i + 7],
+            triangles[i + 8],
         ];
         const avg = (sum(a, sum(b, c)));
         normales.push(avg);
@@ -115,9 +115,9 @@ export class Sphere extends Model {
 
         const normales = genNormales(itri);
 
-        let indices = [];
-        for (let i = 0; i < normales.length; i+=3) {
-            indices.push(i/3);
+        const indices = [];
+        for (let i = 0; i < normales.length; i += 3) {
+            indices.push(i / 3);
         }
         const color = [1.0, 0.0, 0.0, 1.0];
 

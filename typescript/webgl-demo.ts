@@ -8,16 +8,20 @@ import { Octo2 } from './shapes/octo2';
 import { Rect } from './shapes/rect';
 import { Mat4, Vec4 } from './matrices';
 import { FBO } from './fbo';
+import { IModel } from './shapes/model';
+import { Cube } from './shapes/cube';
+import { Sphere } from './shapes/sphere';
 import { 
     identity, ortho, perspective, rotate, scale, translate,
  } from './matrices';
 import { Cylinder } from './shapes/cylinder';
+import { Octo } from './shapes/octo';
 
 let cubeRotation = 0.0;
 let yAngle = 0.0;
 let distance = 6.0;
 
-function tryDetectError(gl:WebGLRenderingContext) {
+function tryDetectError(gl: WebGLRenderingContext) {
     const errorCode = gl.getError();
     if (errorCode !== gl.NO_ERROR) {
         console.error(`GL ERROR OCCURED, CODE=${errorCode}`);
@@ -52,6 +56,7 @@ function getOctoMatrix2() {
     scale(modelMatrix, [2.0, 1.0, 1.0]);
     translate(modelMatrix,  [-1.0, 1.0, 0.0]);
     rotate(modelMatrix, cubeRotation * 0.2, [1, 0, 0]);
+
     return modelMatrix;
 }
 function getCylinderMatrix() {
@@ -64,7 +69,7 @@ function getCylinderMatrix() {
 function drawScene(
     gl: WebGLRenderingContext,
     shader: Shader,
-    models: Model[],
+    models: IModel[],
     viewMatrix: Mat4,
     time: number,
 ) {
@@ -101,6 +106,7 @@ function drawScene(
         'lightDirection',
         [sinTime, cosTime, 0.8, 0.0],
     );
+
 
     models[0].draw(getCubeMatrix(),shader);
     models[1].draw(getOctoMatrix(),shader);
@@ -147,6 +153,7 @@ function handleKeyboard(pressedKeysMap: Map<number, boolean>) {
 function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, boolean>) {
     const basicShader = new DefaultShader(gl);
     const texturedShader = new TexturedShader(gl);
+
     let then = 0;
 
     gl.enable(gl.CULL_FACE);
@@ -154,7 +161,7 @@ function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, bo
 
     const cubeModel = new Cube(gl);
     const octoModel = new Sphere(gl);
-    const octoModel2 = new Octo2(gl);
+    const octoModel2 = new Octo(gl);
     const cylinderModel = new Cylinder(gl);
 
     const rect = new Rect(gl);
@@ -163,9 +170,10 @@ function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, bo
     const fboY =  new FBO(gl, 512, 512);
     const fboZ =  new FBO(gl, 512, 512);
 
-    const models = [ cubeModel, octoModel, octoModel2, cylinderModel ];
+    const models: IModel[] = [ cubeModel, octoModel, octoModel2, cylinderModel ];
 
     const canvas = gl.canvas as HTMLCanvasElement;
+
 
     function render(now: number) {
 
