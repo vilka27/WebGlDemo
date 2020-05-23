@@ -1,12 +1,12 @@
 export class SimpleCache<T> {
 
     constructor(
-        private creator: (key: string) => T,
+        private readonly creator: (key: string) => T,
     ) {
         this.creator = creator;
     }
 
-    private readonly map = {};
+    private readonly map = { };
     
     get(key: string): T {
         const oldValue = this.map[key];
