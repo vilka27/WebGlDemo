@@ -238,10 +238,10 @@ export function scewY(out: Mat4, y: number): Mat4 {
     return out;
   }
 export function scewX(out: Mat4, x: number): Mat4 {
-    out[4] = x * out[0] + out[4] ;
-    out[5] = x * out[1] + out[5];
-    out[6] = x * out[2] + out[6];
-    out[7] = x * out[3] + out[7];
+    out[4] += x * out[0];
+    out[5] += x * out[1];
+    out[6] += x * out[2];
+    out[7] += x * out[3];
     return out;
   }
 
