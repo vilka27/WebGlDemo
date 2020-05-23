@@ -109,7 +109,7 @@ export class Sphere extends Model {
             0, 1, 0,
         ];
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 2; i++) {
             itri = genTriangles(itri);
         }
 

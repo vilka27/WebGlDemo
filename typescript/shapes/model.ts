@@ -2,13 +2,13 @@ import { Shader } from '../shaders/shader';
 
 export class Model {
     private gl: WebGLRenderingContext;
-    private buffers: ModelBuffers;
+    buffers: ModelBuffers;
 
     constructor(
         gl,
         private positions: number[],
         private normales: number[],
-        private indices: number[],
+        public indices: number[],
         private colors: number[],
     ) {
         this.gl = gl;

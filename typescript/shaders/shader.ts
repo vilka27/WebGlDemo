@@ -85,5 +85,8 @@ export class Shader {
     setVector3f(name: string, value: Vec3) {
         this.gl.uniform3fv(this.uniformsCache.get(name), value);
     }
+    set1i(name: string, value: number) {
+        this.gl.uniform1i(this.uniformsCache.get(name), value);
+    }
 
 }
