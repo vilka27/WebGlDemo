@@ -4,12 +4,12 @@ import  { TexturedShader } from './shaders/texturedShader';
 import { Cube } from './shapes/cube';
 import { Sphere } from './shapes/sphere';
 import { Rect } from './shapes/rect';
-import { Mat4 } from './matrices';
+import { Mat4, scewY, scewZ } from './matrices';
 import { FBO } from './fbo';
 import { IModel } from './shapes/model';
 
 import { 
-    identity, ortho, perspective, rotate, scale, translate,
+    identity, ortho, perspective, rotate, scale, scewX, translate,
  } from './matrices';
 import { Cylinder } from './shapes/cylinder';
 import { Octo } from './shapes/octo';
@@ -37,8 +37,11 @@ function tryDetectError(gl: WebGLRenderingContext) {
 function getCubeMatrix() {
     const modelMatrix = identity();
     translate(modelMatrix, [2.0, 0.0, 0.0]);
-    rotate(modelMatrix, cubeRotation, [0, 0, 1]);
-    rotate(modelMatrix, cubeRotation * 0.2, [0, 1, 0]);
+    rotate(modelMatrix, -0.5, [0, 1, 0]);
+    translate(modelMatrix, [0.0, -1.5, 0.0]);    
+    scewX(modelMatrix, 0.05 * Math.sin(cubeRotation * 40));
+    translate(modelMatrix, [0.0, 1.5, 0.0]);
+    rotate(modelMatrix, 0.5, [0, 1, 0]);
     return modelMatrix;
 }
 
@@ -174,8 +177,8 @@ function initRenderLoop(gl: WebGLRenderingContext, pressedKeysMap: Map<number, b
 
     function render(now: number) {
 
-        var displayWidth  = canvas.clientWidth;
-        var displayHeight = canvas.clientHeight;
+        const displayWidth  = canvas.clientWidth;
+        const displayHeight = canvas.clientHeight;
         if (canvas.width  != displayWidth ||
             canvas.height != displayHeight) {    
           canvas.width  = displayWidth;
