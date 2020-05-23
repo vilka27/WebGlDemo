@@ -1,12 +1,12 @@
 export class FBO {
 
 
-    private fb: WebGLFramebuffer;
-    private targetTexture: WebGLTexture;
-    private depthBuffer: WebGLRenderbuffer;
+    private readonly fb: WebGLFramebuffer;
+    private readonly targetTexture: WebGLTexture;
+    private readonly depthBuffer: WebGLRenderbuffer;
 
     constructor(
-        private gl: WebGLRenderingContext,
+        private readonly gl: WebGLRenderingContext,
         public width: number,
         public height: number,
     ) {

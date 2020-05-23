@@ -1,16 +1,13 @@
 import  { Shader } from './shaders/shader';
 import  { DefaultShader } from './shaders/defaultShader';
 import  { TexturedShader } from './shaders/texturedShader';
-import { Model } from './shapes/model';
 import { Cube } from './shapes/cube';
 import { Sphere } from './shapes/sphere';
-import { Octo2 } from './shapes/octo2';
 import { Rect } from './shapes/rect';
-import { Mat4, Vec4 } from './matrices';
+import { Mat4 } from './matrices';
 import { FBO } from './fbo';
 import { IModel } from './shapes/model';
-import { Cube } from './shapes/cube';
-import { Sphere } from './shapes/sphere';
+
 import { 
     identity, ortho, perspective, rotate, scale, translate,
  } from './matrices';
@@ -108,21 +105,21 @@ function drawScene(
     );
 
 
-    models[0].draw(getCubeMatrix(),shader);
-    models[1].draw(getOctoMatrix(),shader);
-    models[2].draw(getOctoMatrix2(),shader);
-    models[3].draw(getCylinderMatrix(),shader);
+    models[0].draw(getCubeMatrix(), shader);
+    models[1].draw(getOctoMatrix(), shader);
+    models[2].draw(getOctoMatrix2(), shader);
+    models[3].draw(getCylinderMatrix(), shader);
 
     tryDetectError(gl);
 }
-function drawFBO(gl:WebGLRenderingContext, texturedShader: TexturedShader, rect: Rect, fboX: FBO, fboY: FBO, fboZ: FBO) {
+function drawFBO(gl: WebGLRenderingContext, texturedShader: TexturedShader, rect: Rect, fboX: FBO, fboY: FBO, fboZ: FBO) {
     texturedShader.useProgram();
     texturedShader.set1i('u_texture', 0);  
     rect.bind(texturedShader.getAttribute('aVertexPosition')); 
     function draw(fbo: FBO, x: number) {
-        fbo.bindTexture()
-        let orto = ortho(-3.0, 3.0, -3.0, 3.0, 0.0, 100.0,);
-        translate(orto, [x, -3.0, 0.0],);
+        fbo.bindTexture();
+        const orto = ortho(-3.0, 3.0, -3.0, 3.0, 0.0, 100.0);
+        translate(orto, [x, -3.0, 0.0]);
         texturedShader.setMatrix('u_matrix', orto);
         rect.draw();
     }
@@ -150,7 +147,7 @@ function handleKeyboard(pressedKeysMap: Map<number, boolean>) {
     }
 }
 
-function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, boolean>) {
+function initRenderLoop(gl: WebGLRenderingContext, pressedKeysMap: Map<number, boolean>) {
     const basicShader = new DefaultShader(gl);
     const texturedShader = new TexturedShader(gl);
 
@@ -205,7 +202,7 @@ function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, bo
             fboY.bind();
             const viewMatrix = identity();
             translate(viewMatrix, [0, 0, -distance]);
-            rotate(viewMatrix, Math.PI/2, [0, 1, 0]);
+            rotate(viewMatrix, Math.PI / 2, [0, 1, 0]);
             drawScene( gl, basicShader, models, viewMatrix, newNow );
             fboY.unbind();
         }
@@ -213,7 +210,7 @@ function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, bo
             fboZ.bind();
             const viewMatrix = identity();
             translate(viewMatrix, [0, 0, -distance]);
-            rotate(viewMatrix, Math.PI/2, [1, 0, 0]);
+            rotate(viewMatrix, Math.PI / 2, [1, 0, 0]);
             drawScene( gl, basicShader, models, viewMatrix, newNow );
             fboZ.unbind();
         }

@@ -1,5 +1,5 @@
 import { Model } from './model';
-import { normalize, sum } from '../matrices';
+import { normalizeVec3 } from '../matrices';
 
 export class Cylinder extends Model {
 
@@ -23,7 +23,7 @@ export class Cylinder extends Model {
 
         for (let i = 0; i < anglesAmount; i++) {
             const a = items[i];
-            const b = items[i+1];
+            const b = items[i + 1];
 
             const x1 = a[0];
             const x2 = b[0];
@@ -38,7 +38,7 @@ export class Cylinder extends Model {
             const O1 = [0, 0, 1.0];
             const O2 = [0, 0, -1.0];
 
-            const NR = normalize([ F[0]+G[0], F[1]+G[1], 0 ]);
+            const NR = normalizeVec3([ F[0] + G[0], F[1] + G[1], 0 ]);
             const NO1 = [0, 0, 1.0];
             const NO2 = [0, 0, -1.0];
 
@@ -76,7 +76,7 @@ export class Cylinder extends Model {
         }
 
 
-        let indices = [];
+        const indices = [];
         for (let i = 0; i < normales.length; i++) {
             indices.push(i);
         }

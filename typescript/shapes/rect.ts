@@ -1,11 +1,9 @@
-import { Model } from './model';
-
 export class Rect {
 
-    private gl: WebGLRenderingContext;
-    public indices: WebGLBuffer;
-    public position: WebGLBuffer;
-    public indicesCount: number;
+    private readonly gl: WebGLRenderingContext;
+    indices: WebGLBuffer;
+    position: WebGLBuffer;
+    indicesCount: number;
 
     constructor(gl: WebGLRenderingContext) {
         this.gl = gl;
@@ -33,7 +31,7 @@ export class Rect {
     }
 
     bind(
-        vertexPositionAttribute: number
+        vertexPositionAttribute: number,
     ) {
         {
             const numComponents = 3;
@@ -53,7 +51,7 @@ export class Rect {
                 stride,
                 offset,
             );
-            this.gl.enableVertexAttribArray(vertexPositionAttribute,);
+            this.gl.enableVertexAttribArray(vertexPositionAttribute);
         }
         {
             this.gl.bindBuffer(
