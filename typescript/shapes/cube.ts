@@ -76,7 +76,7 @@ export class Cube extends Model {
             -1, 0, 0,
         ];
 
-        const color = [1, 1, 0, 1];
+        const color = [1, 1, 1, 1];
 
         super(
             gl,
