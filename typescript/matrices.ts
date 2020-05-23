@@ -1,32 +1,22 @@
-export type Mat4 = Array<number>;
-export type Vec3 = Array<number>;
-export type Vec4 = Array<number>;
+export type Mat4 = [
+    number, number, number, number,
+    number, number, number, number,
+    number, number, number, number,
+    number, number, number, number,
+];
+export type Vec3 = [number, number, number];
+export type Vec4 = [number, number, number, number];
 
-export function identity() {
-    var out = new Array<number>(16);
-    out[0] = 1;
-    out[1] = 0;
-    out[2] = 0;
-    out[3] = 0;
-    out[4] = 0;
-    out[5] = 1;
-    out[6] = 0;
-    out[7] = 0;
-    out[8] = 0;
-    out[9] = 0;
-    out[10] = 1;
-    out[11] = 0;
-    out[12] = 0;
-    out[13] = 0;
-    out[14] = 0;
-    out[15] = 1;
-    return out;
+export function identity(): Mat4 {
+    return [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+    ];
 }
 
-export function translate(
-    matrix: Mat4,
-    vector: Vec3,
-) {
+export function translate(matrix: Mat4, vector: Vec3) {
     const x = vector[0];
     const y = vector[1];
     const z = vector[2];
@@ -40,10 +30,7 @@ export function translate(
         matrix[11] * z + matrix[15];
 }
 
-export function scale(
-    matrix: Mat4,
-    scale: Vec3,
-) {
+export function scale(matrix: Mat4, scale: Vec3) {
     const x = scale[0];
     const y = scale[1];
     const z = scale[2];  
@@ -61,11 +48,7 @@ export function scale(
     matrix[11] *= z;
 }
 
-export function rotate(
-    matrix: Mat4,
-    rad: number,
-    axis: Vec3,
-) {
+export function rotate(matrix: Mat4, rad: number, axis: Vec3) {
     let x = axis[0];
     let y = axis[1];
     let z = axis[2];
@@ -117,55 +100,62 @@ export function rotate(
     matrix[11] = a03 * b20 + a13 * b21 + a23 * b22;
 }
 
-export function perspective(
-    fovy: number,
-    aspect: number,
-    near: number,
-    far: number,
-): Mat4 {
-    var f = 1.0 / Math.tan(fovy / 2);
-    var nf = 1 / (near - far);
-    var matrix = new Array<number>(16);
-    matrix[0] = f / aspect;
-    matrix[1] = 0;
-    matrix[2] = 0;
-    matrix[3] = 0;
-    matrix[4] = 0;
-    matrix[5] = f;
-    matrix[6] = 0;
-    matrix[7] = 0;
-    matrix[8] = 0;
-    matrix[9] = 0;
-    matrix[10] = (far + near) * nf;
-    matrix[11] = -1;
-    matrix[12] = 0;
-    matrix[13] = 0;
-    matrix[14] = 2 * far * near * nf;
-    matrix[15] = 0;
+export function perspective(fovy: number, aspect: number, near: number, far: number): Mat4 {
+    const f = 1.0 / Math.tan(fovy / 2);
+    const nf = 1 / (near - far);
+    const matrix: Mat4 = [
+        f / aspect, 0, 0, 0,
+        0, f, 0, 0,
+        0, 0, (far + near) * nf, -1,
+        0, 0, 2 * far * near * nf, 0,
+    ];
     return matrix;
 }
 
-export function normalize(
-    vector: Vec4,
-): Vec4 {
-    let sum = 0;
-    for (let i = 0; i < vector.length; i++) {
-        sum += vector[i] * vector[i];        
-    }
-    sum = Math.sqrt(sum);
-    for (let i = 0; i < vector.length; i++) {
-        vector[i] /= sum;    
-    }
-    return vector;
+export function normalizeVec3(vector: Vec3): Vec3 {
+    const sumQ = vector[0] * vector[0]
+        + vector[1] * vector[1]
+        + vector[2] * vector[2]; //vector[0] * vector[2];
+    const rLength = Q_rsqrt(sumQ);
+
+    return [
+        vector[0] * rLength,
+        vector[1] * rLength,
+        vector[2] * rLength,
+    ];
 }
 
-export function sum(
-    a: Vec4,
-    b: Vec4,
-): Vec4 {
-    var out = new Array<number>(Math.min(a.length, b.length));
-    for (let i = 0; i < out.length; i++) {
-        out[i] = a[i] + b[i];    
-    }
-    return out;
+const bytes = new ArrayBuffer(Float32Array.BYTES_PER_ELEMENT);
+const floatView = new Float32Array(bytes);
+const intView = new Uint32Array(bytes);
+const threehalfs = 1.5;
+
+function Q_rsqrt(n: number) {
+  const x2 = n * 0.5;
+  floatView[0] = n;
+  intView[0] = 0x5f3759df - ( intView[0] >> 1 );
+  let y = floatView[0];
+  y = y * ( threehalfs - ( x2 * y * y ) );
+
+  return y;
+}
+
+export function sum(a: Vec3, b: Vec3): Vec3 {
+    return [
+        a[0] + b[0],
+        a[1] + b[1],
+        a[2] + b[2],
+    ];
+}
+
+export function vectorProduct(a: Vec3, b: Vec3): Vec3 {
+    return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ];
+}
+
+export function buildVector(from: Vec3, to: Vec3): Vec3 {
+    return [to[0] - from[0], to[1] - from[1], to[2] - from[2]];
 }

@@ -1,5 +1,5 @@
 {
-  "defaultSeverity": "error",
+  "defaultSeverity": "warn",
   "jsRules": {},
   "rules": {
     "semicolon": [true, "always"],
@@ -24,10 +24,6 @@
         "named-imports-order": "case-insensitive"
       }
     ],
-    "interface-name": [
-      true,
-      "never-prefix"
-    ],
     "member-access": [
       true,
       "no-public"
@@ -41,7 +37,24 @@
       "ban-keywords"
     ],
     "eofline": false,
-    "object-literal-sort-keys": false
+    "object-literal-sort-keys": false,
+    "whitespace":[true,"check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-separator",
+      "check-rest-spread",
+      "check-type",
+      "check-typecast",
+      "check-type-operator",
+      "check-preblock",
+      "check-postbrace"],
+    "radix": true,
+    "no-parameter-reassignment": true,
+    "align":true,
+    "prefer-readonly":true,
+    "prefer-const": true,
+    "one-line":true
   },
   "rulesDirectory": []
 }

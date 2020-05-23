@@ -27,9 +27,9 @@ export class Shader {
     private readonly uniformsCache: SimpleCache<WebGLUniformLocation>;
 
     constructor(
-        private gl: WebGLRenderingContext,
-        private vertexSource: string,
-        private fragmentSource: string,
+        private readonly gl: WebGLRenderingContext,
+        private readonly vertexSource: string,
+        private readonly fragmentSource: string,
     ) {
         this.gl = gl;
         this.vertexShader = this.loadShader(
@@ -47,7 +47,7 @@ export class Shader {
         gl.linkProgram(this.program);
         if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
             throw new Error(
-                `Unable to initialize the shader program: `+
+                `Unable to initialize the shader program: ` +
                 gl.getProgramInfoLog(this.program),
             );
         }

@@ -1,17 +1,16 @@
 import  { Shader } from './shaders/shader';
 import  { DefaultShader } from './shaders/defaultShader';
-import { Model } from './shapes/model';
+import { IModel } from './shapes/model';
 import { Cube } from './shapes/cube';
 import { Sphere } from './shapes/sphere';
-import { Octo2 } from './shapes/octo2';
-import { Mat4, Vec4 } from './matrices';
 import { 
     identity, perspective, rotate, scale, translate,
  } from './matrices';
+import { Octo } from './shapes/octo';
 
 let cubeRotation = 0.0;
 
-function tryDetectError(gl:WebGLRenderingContext) {
+function tryDetectError(gl: WebGLRenderingContext) {
     const errorCode = gl.getError();
     if (errorCode !== gl.NO_ERROR) {
         console.error(`GL ERROR OCCURED, CODE=${errorCode}`);
@@ -43,16 +42,16 @@ function getOctoMatrix() {
 }
 function getOctoMatrix2() {
     const modelMatrix = identity();
-    scale(modelMatrix, [2.0, 1.0, 1.0]);
-    translate(modelMatrix,  [-1.0, 1.0, -6.0]);
-    rotate(modelMatrix, cubeRotation * 0.2, [1, 0, 0]);
+    scale(modelMatrix, [1.0, 1.5, 2.0]);
+    translate(modelMatrix,  [-2.0, 2.0, -6.0]);
+    rotate(modelMatrix, cubeRotation * -0.3, [1, 0, 0]);
     return modelMatrix;
 }
 function drawScene(
     gl: WebGLRenderingContext,
     shader: Shader,
     deltaTime: number,
-    models: Model[],
+    models: IModel[],
     time: number,
 ) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
@@ -91,15 +90,15 @@ function drawScene(
         [sinTime, cosTime, 0.8, 0.0],
     );
 
-    models[0].draw(getCubeMatrix(),shader);
-    models[1].draw(getOctoMatrix(),shader);
-    models[2].draw(getOctoMatrix2(),shader);
+    models[0].draw(getCubeMatrix(), shader);
+    models[1].draw(getOctoMatrix(), shader);
+    models[2].draw(getOctoMatrix2(), shader);
 
     cubeRotation += deltaTime;
 
     tryDetectError(gl);
 }
-function initRenderLoop(gl:WebGLRenderingContext) {
+function initRenderLoop(gl: WebGLRenderingContext) {
     const shader = new DefaultShader(gl);
     let then = 0;
 
@@ -108,9 +107,9 @@ function initRenderLoop(gl:WebGLRenderingContext) {
 
     const cubeModel = new Cube(gl);
     const octoModel = new Sphere(gl);
-    const octoModel2 = new Octo2(gl);
+    const octoModel2 = new Octo(gl);
 
-    const models = [ cubeModel, octoModel, octoModel2 ];
+    const models: IModel[] = [ cubeModel, octoModel, octoModel2 ];
 
     function render(now: number) {
         const newNow = 0.001 * now; // convert to seconds
