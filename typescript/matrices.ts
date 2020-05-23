@@ -112,6 +112,27 @@ export function perspective(fovy: number, aspect: number, near: number, far: num
     return matrix;
 }
 
+
+export function ortho(
+    left,
+    right,
+    bottom,
+    top,
+    near,
+    far,
+): Mat4 {
+    var lr = 1 / (left - right);
+    var bt = 1 / (bottom - top);
+    var nf = 1 / (near - far);
+
+    return [
+        -2 * lr, 0, 0, 0,
+        0, -2 * bt, 0, 0,
+        0, 0, 2 * nf, 0,
+        (left + right) * lr, (top + bottom) * bt, (far + near) * nf, 1,
+        ];
+}
+
 export function normalizeVec3(vector: Vec3): Vec3 {
     const sumQ = vector[0] * vector[0]
         + vector[1] * vector[1]

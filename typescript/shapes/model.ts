@@ -11,6 +11,7 @@ export class Model implements IModel {
 
     
     constructor(gl, positions: number[], normales: number[], indices: number[], colors: number[]) {
+
         this.gl = gl;
         this.indices = indices;
         this.positions = positions.map(a => a * 1.0 );
