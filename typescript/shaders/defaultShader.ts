@@ -15,17 +15,23 @@ export class DefaultShader extends Shader {
             uniform mat4 uProjectionMatrix;
 
             varying lowp vec4 worldNormal;
+            varying lowp vec4 worldPosition;
+            varying lowp vec4 screenPosition;
 
             varying lowp vec4 vColor;
 
             void main(void) {
-              gl_Position = uProjectionMatrix * 
-                            uViewMatrix * 
-                            uModelMatrix * 
-                            aVertexPosition;
+              lowp vec4 w = uModelMatrix * 
+                aVertexPosition;
+              lowp vec4 s = uProjectionMatrix * 
+                uViewMatrix * w;
+              gl_Position = s;
+                            
             
               lowp vec4 norm = vec4(aVertexNorm.xyz, 0.0); 
               worldNormal = uModelMatrix * normalize(norm);
+              worldPosition = w;
+              screenPosition = s;
 
               vColor = aVertexColor;
             }
@@ -33,6 +39,8 @@ export class DefaultShader extends Shader {
           `
           varying lowp vec4 vColor;
           varying lowp vec4 worldNormal;
+          varying lowp vec4 worldPosition;
+          varying lowp vec4 screenPosition;
 
           uniform lowp vec4 lightDirection;
 
@@ -40,7 +48,7 @@ export class DefaultShader extends Shader {
               lowp float dp = dot(
                   normalize(worldNormal),
                   normalize(lightDirection)
-              ) * 0.6 + 0.4;
+              ) * 0.4 + 0.4;
               lowp vec3 rgb = dp * vColor.rgb;
               gl_FragColor = vec4(rgb, 1.0);
           }

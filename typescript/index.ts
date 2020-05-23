@@ -9,7 +9,15 @@ function main() {
         return;
     }
 
-    initRenderLoop(gl);
+    const pressedKeysMap = new Map<number, boolean>();    
+    document.addEventListener('keydown', event => { 
+        pressedKeysMap[event.keyCode] = true;
+    }, false);
+    document.addEventListener('keyup', event => {
+        pressedKeysMap[event.keyCode] = false;
+    }, false);
+
+    initRenderLoop(gl, pressedKeysMap);
 }
 
 export default main;
