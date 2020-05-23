@@ -151,7 +151,7 @@ export function ortho(
     bottom,
     top,
     near,
-    far
+    far,
 ): Mat4 {
     var lr = 1 / (left - right);
     var bt = 1 / (bottom - top);

@@ -11,10 +11,10 @@ function main() {
 
     const pressedKeysMap = new Map<number, boolean>();    
     document.addEventListener('keydown', event => { 
-        pressedKeysMap[event.keyCode] = true
+        pressedKeysMap[event.keyCode] = true;
     }, false);
     document.addEventListener('keyup', event => {
-        pressedKeysMap[event.keyCode] = false
+        pressedKeysMap[event.keyCode] = false;
     }, false);
 
     initRenderLoop(gl, pressedKeysMap);

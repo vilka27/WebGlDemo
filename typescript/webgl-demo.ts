@@ -9,13 +9,13 @@ import { Rect } from './shapes/rect';
 import { Mat4, Vec4 } from './matrices';
 import { FBO } from './fbo';
 import { 
-    identity, perspective, rotate, scale, translate, ortho,
+    identity, ortho, perspective, rotate, scale, translate,
  } from './matrices';
 import { Cylinder } from './shapes/cylinder';
 
 let cubeRotation = 0.0;
 let yAngle = 0.0;
-let xAngle = 0.0;
+let distance = 6.0;
 
 function tryDetectError(gl:WebGLRenderingContext) {
     const errorCode = gl.getError();
@@ -65,6 +65,7 @@ function drawScene(
     gl: WebGLRenderingContext,
     shader: Shader,
     models: Model[],
+    viewMatrix: Mat4,
     time: number,
 ) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
@@ -89,11 +90,6 @@ function drawScene(
     shader.useProgram();
 
     shader.setMatrix('uProjectionMatrix', projectionMatrix);
-
-    const viewMatrix = identity();
-    translate(viewMatrix, [0, 0, -6.0]);
-    rotate(viewMatrix, yAngle, [0, 1, 0]);
-    rotate(viewMatrix, xAngle, [1, 0, 0]);
     shader.setMatrix('uViewMatrix', viewMatrix);
 
     const circleTime = (time % 8) / 8;
@@ -113,65 +109,27 @@ function drawScene(
 
     tryDetectError(gl);
 }
-function drawFBO(gl:WebGLRenderingContext, texturedShader: TexturedShader, rect: Rect) {
+function drawFBO(gl:WebGLRenderingContext, texturedShader: TexturedShader, rect: Rect, fboX: FBO, fboY: FBO, fboZ: FBO) {
     texturedShader.useProgram();
-    let orto = ortho(
-        -3.0,
-        3.0,
-        -3.0,
-        3.0,
-        0.0,
-        100.0
-    );
-    translate(
-        orto,
-        [-2.0, -2.0, 0.0]
-    )
-    texturedShader.setMatrix('u_matrix', orto);
-    texturedShader.set1i('u_texture', 0);   
-    {
-        const numComponents = 3;
-        const type = gl.FLOAT;
-        const normalize = false;
-        const stride = 0;
-        const offset = 0;
-        gl.bindBuffer(
-            gl.ARRAY_BUFFER,
-            rect.buffers.position
-        );
-        gl.vertexAttribPointer(
-            texturedShader.getAttribute('aVertexPosition'),
-            numComponents,
-            type,
-            normalize,
-            stride,
-            offset,
-        );
-        gl.enableVertexAttribArray(
-            texturedShader.getAttribute('aVertexPosition'),
-        );
+    texturedShader.set1i('u_texture', 0);  
+    rect.bind(texturedShader.getAttribute('aVertexPosition')); 
+    function draw(fbo: FBO, x: number) {
+        fbo.bindTexture()
+        let orto = ortho(-3.0, 3.0, -3.0, 3.0, 0.0, 100.0,);
+        translate(orto, [x, -3.0, 0.0],);
+        texturedShader.setMatrix('u_matrix', orto);
+        rect.draw();
     }
-    {
-        gl.bindBuffer(
-            gl.ELEMENT_ARRAY_BUFFER, 
-            rect.buffers.indices
-        );
-        const type = gl.UNSIGNED_SHORT;
-        const offset = 0;
-        gl.drawElements(
-            gl.TRIANGLES,
-            rect.indices.length,
-            type,
-            offset,
-        );
-    }
+    draw(fboX, -3.0);
+    draw(fboY, -2.0);
+    draw(fboZ, -1.0);
 }
 
 function handleKeyboard(pressedKeysMap: Map<number, boolean>) {
-    const A = 65
-    const D = 68
-    const W = 87
-    const S = 83
+    const A = 65;
+    const D = 68;
+    const W = 87;
+    const S = 83;
     if (pressedKeysMap[A]) {
         yAngle -= 0.02;
     }
@@ -179,10 +137,10 @@ function handleKeyboard(pressedKeysMap: Map<number, boolean>) {
         yAngle += 0.02;
     }
     if (pressedKeysMap[W]) {
-        xAngle += 0.02;
+        distance -= 0.02;
     }
     if (pressedKeysMap[S]) {
-        xAngle -= 0.02;
+        distance += 0.02;
     }
 }
 
@@ -201,7 +159,9 @@ function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, bo
 
     const rect = new Rect(gl);
 
-    const fbo =  new FBO(gl, 512, 512);
+    const fboX =  new FBO(gl, 512, 512);
+    const fboY =  new FBO(gl, 512, 512);
+    const fboZ =  new FBO(gl, 512, 512);
 
     const models = [ cubeModel, octoModel, octoModel2, cylinderModel ];
 
@@ -226,17 +186,40 @@ function initRenderLoop(gl:WebGLRenderingContext, pressedKeysMap: Map<number, bo
 
         then = newNow;
 
-        fbo.bind();
-        drawScene( gl, basicShader, models, newNow );
-        fbo.unbind();
+        {
+            fboX.bind();
+            const viewMatrix = identity();
+            translate(viewMatrix, [0, 0, -distance]);
+            drawScene( gl, basicShader, models, viewMatrix, newNow );
+            fboX.unbind();
+        }
+        {
+            fboY.bind();
+            const viewMatrix = identity();
+            translate(viewMatrix, [0, 0, -distance]);
+            rotate(viewMatrix, Math.PI/2, [0, 1, 0]);
+            drawScene( gl, basicShader, models, viewMatrix, newNow );
+            fboY.unbind();
+        }
+        {
+            fboZ.bind();
+            const viewMatrix = identity();
+            translate(viewMatrix, [0, 0, -distance]);
+            rotate(viewMatrix, Math.PI/2, [1, 0, 0]);
+            drawScene( gl, basicShader, models, viewMatrix, newNow );
+            fboZ.unbind();
+        }
 
         gl.viewport(
             0, 0,
-            gl.drawingBufferWidth, gl.drawingBufferHeight
+            gl.drawingBufferWidth, gl.drawingBufferHeight,
         );
-        drawScene( gl, basicShader, models, newNow );
+        const viewMatrix = identity();
+        translate(viewMatrix, [0, 0, -distance]);
+        rotate(viewMatrix, yAngle, [0, 1, 0]);
+        drawScene( gl, basicShader, models, viewMatrix, newNow );
 
-        drawFBO(gl, texturedShader, rect)
+        drawFBO(gl, texturedShader, rect, fboX, fboY, fboZ);
 
 
         requestAnimationFrame(render);

@@ -2,13 +2,13 @@ export class FBO {
 
 
     private fb: WebGLFramebuffer;
-    private targetTexture: WebGLTexture
-    private depthBuffer: WebGLRenderbuffer
+    private targetTexture: WebGLTexture;
+    private depthBuffer: WebGLRenderbuffer;
 
     constructor(
         private gl: WebGLRenderingContext,
         public width: number,
-        public height: number
+        public height: number,
     ) {
         this.gl = gl;
         this.width = width;
@@ -48,7 +48,7 @@ export class FBO {
         const attachmentPoint = gl.COLOR_ATTACHMENT0;
         gl.framebufferTexture2D(
         gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D,
-            this.targetTexture, level
+            this.targetTexture, level,
         );
 
         gl.renderbufferStorage(gl.RENDERBUFFER,
