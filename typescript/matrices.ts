@@ -212,11 +212,18 @@ export function scewY(matrix: Mat4, y: number): Mat4 {
     return multiplyMat4(matrix, matrix, mat);
 }
 
-export function scewX(matrix: Mat4, x: number): Mat4 {
+/*export function scewX(matrix: Mat4, x: number): Mat4 {
     const mat = identity();
     mat[4] = x;
     return multiplyMat4(matrix, matrix, mat);
-}
+}*/
+export function scewX(out: Mat4, x: number): Mat4 {
+    out[4] = x * out[0] + out[4] ;
+    out[5] = x * out[1] + out[5];
+    out[6] = x * out[2] + out[6];
+    out[7] = x * out[3] + out[7];
+    return out;
+  }
 export function scewZ(matrix: Mat4, z: number): Mat4 {
     const mat = identity();
     mat[2] = z;
