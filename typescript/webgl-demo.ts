@@ -3,8 +3,10 @@ import  { DefaultShader } from './shaders/defaultShader';
 import { IModel } from './shapes/model';
 import { Cube } from './shapes/cube';
 import { Sphere } from './shapes/sphere';
+
+
 import { 
-    identity, perspective, rotate, scale, translate,
+    identity, perspective, rotate, scale, scewX, translate,
  } from './matrices';
 import { Octo } from './shapes/octo';
 
@@ -28,9 +30,17 @@ function tryDetectError(gl: WebGLRenderingContext) {
 }
 function getCubeMatrix() {
     const modelMatrix = identity();
-    translate(modelMatrix, [2.0, 0.0, -6.0]);
-    rotate(modelMatrix, cubeRotation, [0, 0, 1]);
-    rotate(modelMatrix, cubeRotation * 0.2, [0, 1, 0]);
+
+    translate(modelMatrix, [2.0, -4.0, 0.0]);
+    scale(modelMatrix, [0.5, 0.5, 0.5]);
+    
+    //rotate(modelMatrix, 1, [0, 0, 1]);
+    //rotate(modelMatrix, cubeRotation, [0, 0, 1]);
+    scewX(modelMatrix, cubeRotation % 5 * 0.05 * Math.sin(cubeRotation * 30));
+    translate(modelMatrix, [0, 1.0, 0.0]);
+    //scewY(modelMatrix, Math.sin(cubeRotation));
+    //rotate(modelMatrix, cubeRotation * 0.2, [0, 1, 0]);
+
     return modelMatrix;
 }
 
