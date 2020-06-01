@@ -1,12 +1,9 @@
-import { Model } from './model';
-import { normalizeVec3 } from '../matrices';
+import { Fragment, Model, Triangle } from './model';
+import { normalizeVec3, Vec4 } from '../matrices';
 
 export class Cylinder extends Model {
 
-
     constructor(gl: WebGLRenderingContext) {
-   
-        
         const anglesAmount = 16;
 
         const items: number[][] = [];
@@ -18,8 +15,7 @@ export class Cylinder extends Model {
             items.push([x, y]);
         }
 
-        const triangles: number[][] = [];
-        const normales: number[][] = [];
+        const points: number[][] = [];
 
         for (let i = 0; i < anglesAmount; i++) {
             const a = items[i];
@@ -38,59 +34,37 @@ export class Cylinder extends Model {
             const O1 = [0, 0, 1.0];
             const O2 = [0, 0, -1.0];
 
-            const NR = normalizeVec3([ F[0] + G[0], F[1] + G[1], 0 ]);
-            const NO1 = [0, 0, 1.0];
-            const NO2 = [0, 0, -1.0];
 
-            triangles.push(E);
-            triangles.push(F);
-            triangles.push(H);
+            points.push(E);
+            points.push(F);
+            points.push(H);
 
-            normales.push(NR);
-            normales.push(NR);
-            normales.push(NR);
+            points.push(F);
+            points.push(G);
+            points.push(H);
 
-            triangles.push(F);
-            triangles.push(G);
-            triangles.push(H);
+            points.push(F);
+            points.push(O1);
+            points.push(G);
 
-            normales.push(NR);
-            normales.push(NR);
-            normales.push(NR);
-
-            triangles.push(F);
-            triangles.push(O1);
-            triangles.push(G);
-
-            normales.push(NO1);
-            normales.push(NO1);
-            normales.push(NO1);
-
-            triangles.push(H);
-            triangles.push(O2);
-            triangles.push(E);
-
-            normales.push(NO2);
-            normales.push(NO2);
-            normales.push(NO2);
+            points.push(H);
+            points.push(O2);
+            points.push(E);
         }
 
+        const defaultColor: Vec4 = [0.2, 0.2, 1.0, 1.0];
 
-        const indices = [];
-        for (let i = 0; i < normales.length; i++) {
-            indices.push(i);
-        }
-
-        const color = [0.2, 0.2, 1.0, 1.0];
-
+        const triangles: Triangle[] = points.groupBy(3);
+        
+        const fragments: Fragment[] = triangles.map(tr => {
+            return {
+                triangle: tr,
+                color: defaultColor,
+            };
+        });
         super(
             gl,
-            triangles.flat(),
-            normales.flat(),
-            indices,
-            (new Array(Math.ceil(triangles.length)))
-                .fill(color, 0)
-                .flat(),
+            fragments,
         );
     }
 

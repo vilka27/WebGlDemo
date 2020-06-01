@@ -1,91 +1,79 @@
-import { Model } from './model';
+import { Fragment, Model } from './model';
+import { Vec4 } from '../matrices';
 
 export class Cube extends Model {
 
     constructor(gl: WebGLRenderingContext) {
-        const indices = [
-            0, 2, 3, 0, 1, 2, // front
-            4, 5, 6, 4, 6, 7, // back
-            8, 9, 10, 8, 10, 11, // top
-            12, 13, 14, 12, 14, 15, // bottom
-            16, 17, 18, 16, 18, 19, // right
-            20, 21, 22, 20, 22, 23, // left
+        const defaultColor: Vec4 = [1, 1, 1, 1];
+        const A = [-1, 1, 1];
+        const B = [-1, 1, -1];
+        const C = [1, 1, -1];
+        const D = [1, 1, 1];
+
+        const E = [-1, -1, 1];
+        const F = [-1, -1, -1];
+        const G = [1, -1, -1];
+        const H = [1, -1, 1];
+
+
+        const topFace = [
+            {
+                triangle: [A, C, B],
+            },
+            {
+                triangle: [A, D, C],
+            },
         ];
-        const positions = [
-            // Front face
-            -1.0, -1.0, 1.0, // (x, y, z) - 1 вершина
-            1.0, -1.0, 1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            // Back face
-            -1.0, -1.0, -1.0,
-            -1.0, 1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, -1.0, -1.0,
-            // Top face
-            -1.0, 1.0, -1.0,
-            -1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0,
-            1.0, 1.0, -1.0,
-            // Bottom face
-            -1.0, -1.0, -1.0,
-            1.0, -1.0, -1.0,
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            // Right face
-            1.0, -1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0,
-            1.0, -1.0, 1.0,
-            // Left face
-            -1.0, -1.0, -1.0,
-            -1.0, -1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, 1.0, -1.0,
-        ];
-        const normals = [
-            // Front face
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            // Back face
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            0, 0, -1,
-            // Top face
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            // Bottom face
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            // Right face
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            // Left face
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -1, 0, 0,
+        const bottomFace = [
+            {
+                triangle: [E, F, G],
+            },
+            {
+                triangle: [E, G, H],
+            },
         ];
 
-        const color = [1, 1, 1, 1];
+        const frontFace = [
+            {
+                triangle: [E, D, A],
+            },
+            {
+                triangle: [E, H, D],
+            },
+        ];
+        const backFace = [
+            {
+                triangle: [C, G, F],
+            },
+            {
+                triangle: [C, F, B],
+            },
+        ];
 
+        const rightFace = [
+            {
+                triangle: [H, G, C],
+            },
+            {
+                triangle: [H, C, D],
+            },
+        ];
+        const leftFace = [
+            {
+                triangle: [B, E, A],
+            },
+            {
+                triangle: [B, F, E],
+            },
+        ];
+        const fragments: Fragment[] = 
+        [].concat(frontFace, backFace, topFace, bottomFace, rightFace, leftFace);
+        fragments.forEach(fr => {
+            fr.color = defaultColor;
+        });
         super(
             gl,
-            positions,
-            normals,
-            indices,
-            (new Array(Math.ceil(positions.length / 3)))
-                .fill(color, 0)
-                .flat(),
+            fragments,
         );
     }
 
