@@ -1,5 +1,5 @@
-import { Model } from './model';
-import { normalizeVec3, sum, Vec3 } from '../matrices';
+import { Fragment, Model, Triangle } from './model';
+import { normalizeVec3, sum, Vec3, Vec4 } from '../matrices';
 
 function genTriangles(initial: number[]): number[] {
     const newArray: number[][] = [];
@@ -44,91 +44,49 @@ function genTriangles(initial: number[]): number[] {
     return newArray.flat();
 }
 
-function genNormales(triangles: number[]): number[] {
-    const normales: number[][] = [];
-    for (let i = 0; i < triangles.length; i += 9) {
-        const a: Vec3  = [
-            triangles[i + 0],
-            triangles[i + 1],
-            triangles[i + 2],
-        ];
-        const b: Vec3  = [
-            triangles[i + 3],
-            triangles[i + 4],
-            triangles[i + 5],
-        ];
-        const c: Vec3  = [
-            triangles[i + 6],
-            triangles[i + 7],
-            triangles[i + 8],
-        ];
-        const avg = (sum(a, sum(b, c)));
-        normales.push(avg);
-        normales.push(avg);
-        normales.push(avg);
-    }
-    return normales.flat();
-}
-
 export class Sphere extends Model {
 
-
     constructor(gl: WebGLRenderingContext) {
-   
-        let itri = [            
-            0,  0, 1,
-            0, -1, 0,
-            1,  0, 0,
+        
+        const A: Vec3 = [1, 0, 0];
+        const B: Vec3 = [0, -1, 0];
+        const C: Vec3 = [-1, 0, 0];
+        const D: Vec3 = [0, 1, 0]; 
+        const E: Vec3 = [0, 0, -1];
+        const F: Vec3 = [0, 0, 1];
 
-            0, 0, 1,
-            1, 0, 0,
-            0, 1, 0,
+        const trs: Triangle[] = [
+            [A, E, D], 
+            [A, B, E],
+            [C, D, E],
+            [B, C, E],
+            [A, D, F], 
+            [C, F, D], 
+            [B, F, C], 
+            [A, F, B], 
 
-            0,  0, 1,
-            -1,  0, 0,
-            0, -1, 0,
-
-            0, 0, 1,
-            0, 1, 0,
-            -1, 0, 0,
-
-            0,  0, -1,
-            1,  0, 0,
-            0, -1, 0,
-
-            1, 0, 0,
-            0, 0, -1,
-            0, 1, 0,
-
-            0,  0, -1,
-            0, -1, 0,
-            -1,  0, 0,
-
-            0, 0, -1,
-            -1, 0, 0,
-            0, 1, 0,
         ];
+        let itri: number[] = trs.flat().flat();
 
         for (let i = 0; i < 2; i++) {
             itri = genTriangles(itri);
         }
 
-        const normales = genNormales(itri);
+        const color: Vec4 = [1.0, 0.0, 0.0, 1.0];
 
-        const indices = [];
-        for (let i = 0; i < normales.length; i += 3) {
-            indices.push(i / 3);
-        }
-        const color = [1.0, 0.0, 0.0, 1.0];
+        const points: Vec3[] = itri.groupBy(3);
 
+        const triangles: Triangle[] = points.groupBy(3);
+
+        const fragments: Fragment[] = triangles.map(tr => {
+            return {
+                triangle: tr,
+                color,
+            };
+        });
         super(
             gl,
-            itri,
-            normales,
-            indices,
-            (new Array(Math.ceil(itri.length / 3)))
-                .fill(color, 0)
-                .flat(),
+            fragments,
         );
     }
 
